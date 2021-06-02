@@ -44,7 +44,7 @@ class DateRange:
 
 start_date = dt.datetime.strptime(args["start_date"], args["date_format"])
 time_delta = dt.timedelta(days=7) if not args["monthly"] else rd.relativedelta(months=+1)
-last_date = dt.datetime.strptime(args["end_date"], args["date_format"])
+last_date = dt.datetime.today() if args["end_date"] is None else dt.datetime.strptime(args["end_date"], args["date_format"]) 
 
 weekly_p_l = dict()
 while (start_date + time_delta < last_date):
