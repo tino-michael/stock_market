@@ -7,8 +7,8 @@ import dateutil.relativedelta as rd
 import argparse
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-s", "--sheet", type=str, required=True)
-ap.add_argument("-d", "--start_date", type=str, required=True)
+ap.add_argument("-x", "--excel_sheet", type=str, default=None)
+ap.add_argument("-s", "--start_date", type=str, required=True)
 ap.add_argument("-e", "--end_date", type=str, default=None)
 ap.add_argument("-f", "--date_format", type=str, default="%Y-%m-%d")
 ap.add_argument("-m", "--monthly", default=False, action='store_true')
@@ -37,21 +37,21 @@ class DateRange:
             return self.start <= date <= self.end
     def __repr__(self):
         return \
-            f"{self.start.year}-{self.start.month}-{self.start.day}" \
+            f"{self.start.strftime(args['date_format'])}" \
             + " to " + \
-            f"{self.end.year}-{self.end.month}-{self.end.day}"
+            f"{self.end.strftime(args['date_format'])}"
 
 
 start_date = dt.datetime.strptime(args["start_date"], args["date_format"])
 time_delta = dt.timedelta(days=7) if not args["monthly"] else rd.relativedelta(months=+1)
-last_date = dt.datetime.today() if args["end_date"] is None else dt.datetime.strptime(args["end_date"], args["date_format"]) 
+last_date = dt.datetime.today() if args["end_date"] is None else dt.datetime.strptime(args["end_date"], args["date_format"])
 
 weekly_p_l = dict()
 while (start_date + time_delta < last_date):
     weekly_p_l[DateRange(start_date, start_date + time_delta)] = CreditDebit()
     start_date += time_delta
-else:
-    weekly_p_l[DateRange(start_date, last_date, True)] = CreditDebit()
+
+weekly_p_l[DateRange(start_date, last_date, True)] = CreditDebit()
 
 
 # I'm only interested in regular cashflow actions. "buy" and "sell" refers to the underlying

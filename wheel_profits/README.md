@@ -19,7 +19,7 @@ For the script to work, you need to provide a start date (`-d`) and the path to 
 document (`-s`, which can be online). You can provide an end date if you like (`-e`),
 by default the current day will be used. The dates are assumed to be formatted according
 to ISO: YYYY-MM-DD; but this can be overwritten (`-f`).
-By default, the tally is calculated in weekly intervalls but can be switched to monthly (`-m`).
+By default, the tally is calculated in weekly intervals but can be switched to monthly (`-m`).
 If there are sheets (or tabs) in the document you don't want to read in, you can skip them
 with `-t`. In the spreadsheets, I also enter buy, sell and LEAPS orders, but I don't want
 those to end up in the calculation in here, so you can skip "actions" that contain a certain
@@ -34,7 +34,7 @@ shell script or alias like so:
 $BIN="/path/to/this/python/script.py"
 $SHEETS="/path/to/your/excel/sheet.xlsx"
 
-$BIN -s $SHEETS -d "2021-05-03" \
+$BIN -x $SHEETS -s "2021-05-03" \
     --skip_actions LEAPS buy sell \
     --skip_sheets blank Sheet3
 ```
