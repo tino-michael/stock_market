@@ -57,11 +57,11 @@ weekly_p_l[DateRange(start_date, last_date, True)] = CreditDebit()
 # I'm only interested in regular cashflow actions. "buy" and "sell" refers to the underlying
 # stocks and means the options got assigned. LEAPS are long-term investments and ought not
 # to show up here either.
-skip_actions = args["skip_actions"]
+skip_actions = args["skip_actions"] or []
 
 # The document contains some more sheets (template and book keeping) that don't belong
 # into the weekly tally
-skip_sheets = args["skip_sheets"]
+skip_sheets = args["skip_sheets"] or []
 
 # read in the excel spreadsheets document
 workbook = args["sheet"]
