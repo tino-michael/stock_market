@@ -15,10 +15,10 @@ document which then can be read by this here python script.
 
 ## Usage
 
-For the script to work, you need to provide a start date (`-d`) and the path to the excel
-document (`-s`, which can be online). You can provide an end date if you like (`-e`),
-by default the current day will be used. The dates are assumed to be formatted according
-to ISO: YYYY-MM-DD; but this can be overwritten (`-f`).
+For the script to work, you need to provide a start date (`-s`) and the path to the excel
+document (`-x`, which can be online). You can provide an end date if you like (`-e`),
+by default the current day will be used. The dates for these flags are assumed to be formatted according
+to ISO: YYYY-MM-DD; but this can be overwritten (`-f`, format string according to python's `datetime`).
 By default, the tally is calculated in weekly intervals but can be switched to monthly (`-m`).
 If there are sheets (or tabs) in the document you don't want to read in, you can skip them
 with `-t`. In the spreadsheets, I also enter buy, sell and LEAPS orders, but I don't want
@@ -31,8 +31,8 @@ shell script or alias like so:
 ```bash
 #!/bin/sh
 
-$BIN="/path/to/this/python/script.py"
-$SHEETS="/path/to/your/excel/sheet.xlsx"
+BIN="/path/to/this/python/script.py"
+SHEETS="/path/to/your/excel/sheet.xlsx"
 
 $BIN -x $SHEETS -s "2021-05-03" \
     --skip_actions LEAPS buy sell \
