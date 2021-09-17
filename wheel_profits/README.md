@@ -10,8 +10,8 @@ This script was heavily inspired by the [In the Money](https://www.youtube.com/c
 YouTube channel. In one of his video tutorials, Adam presented the "Wheel" strategy for
 stock options trading and provided a link to a convenient Google spreadsheet
 ([click here](https://docs.google.com/spreadsheets/d/1mUJYD9jdVeEl-dwTfq2aXiPINf8698OehsSe34xOUfc/edit?usp=sharing) for my version with updated formatting).
-This spreadsheet can be exported and/or published (File -> Publish to the web) as an excel
-document which then can be read by this here python script.
+This spreadsheet can be exported and/or published (copy to your own Google Drive, then:
+File -> Publish to the web) as an excel document which then can be read by this here python script.
 
 ## Usage
 
