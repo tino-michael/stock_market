@@ -7,9 +7,13 @@ import dateutil.relativedelta as rd
 import argparse
 
 from read_csv_dir import read_csv_dir
+import utils
+
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-x", "--excel_sheet", type=str, default=None)
 ap.add_argument("-d", "--csv_directory", type=str, default=None)
+ap.add_argument("--tickers", nargs='*', type=str, default=[])
 ap.add_argument("-s", "--start_date", type=str, required=True)
 ap.add_argument("-e", "--end_date", type=str, default=None)
 ap.add_argument("-f", "--date_format", type=str, default="%Y-%m-%d")
@@ -70,33 +74,39 @@ while start_date + time_delta < last_date:
 weekly_p_l[DateRange(start_date, last_date, True)] = CreditDebit()
 
 
+# reading in the data
 if args["csv_directory"] is not None:
-    data_map = read_csv_dir(args["csv_directory"])
+    data_map = read_csv_dir(args["csv_directory"], args["tickers"])
 elif args["excel_sheet"] is not None:
     from read_excel import read_excel
     # read in the excel spreadsheets document
     workbook = args["excel_sheet"]
     read_excel(workbook, weekly_p_l, args["skip_sheets"] or [], args["skip_actions"] or [])
 
+# concatenate the data frames from all ticker symbols
+data_frame = pd.concat([df for df in data_map.values()])
+
+# if one is only interested in cash flow from options, e.g. buy, sell and LEAPS actions
+# can be excluded here
+if args["skip_actions"]:
+    data_frame = utils.skip_actions(data_frame, args["skip_actions"])
 
 
+for _, row in data_frame.iterrows():
+    date = pd.to_datetime(row.loc["Date"])
+    for time, p_l in weekly_p_l.items():
+        if time.contains(date):
+            value = row.loc["Total Value"]
+            if value > 0:
+                p_l.c += value
+            else:
+                p_l.d -= value
+            break
 
-for ticker, df in data_map.items():
-    for _, row in df.iterrows():
-        date = pd.to_datetime(row.loc["Date"])
-        for time, p_l in weekly_p_l.items():
-            if time.contains(date):
-                value = row.loc["Total Value"]
-                if value > 0:
-                    p_l.c += value
-                else:
-                    p_l.d -= value
-                break
-
-# remove empty entries
-weekly_p_l = {i:j for i,j in weekly_p_l.items() if j != CreditDebit()}
 total = 0
 for p in weekly_p_l.items():
+    if p[1].sum() == 0: continue
     print(p)
     total += p[1].sum()
+
 print("total:", total)
