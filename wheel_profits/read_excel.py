@@ -1,5 +1,65 @@
-import sys
+"""
+legacy excel sheet importing
+"""
+
 import pandas as pd
+
+import datetime as dt
+import dateutil.relativedelta as rd
+
+
+class CreditDebit:
+    """ small class to collect credits and debits and have a nice string representation
+    """
+    def __init__(self):
+        self.c = 0
+        self.d = 0
+
+    def sum(self):
+        """ return the differens between credits and debits, i.e. total gains
+        """
+        return self.c - self.d
+
+    def __repr__(self):
+        return f"p: {self.c}, l: {self.d}, total: {self.sum()}"
+
+
+class DateRange:
+    """ simple time interval that can check whether it contains another date
+    """
+    def __init__(self, start, end, inclusive=False):
+        self.start = start
+        self.end = end
+        if not inclusive:
+            self.end += dt.timedelta(days=-1)
+
+    def contains(self, other):
+        """ checks whether another date is contained within this range
+        """
+        return self.start <= other <= self.end
+
+    def __repr__(self):
+        return \
+            f"{self.start.strftime(args['date_format'])}" \
+            + " to " + \
+            f"{self.end.strftime(args['date_format'])}"
+
+
+
+def get_weekly_p_l(args):
+    start_date = dt.datetime.strptime(args["start_date"], args["date_format"])
+    time_delta = dt.timedelta(days=7) if not args["monthly"] else rd.relativedelta(months=+1)
+    last_date = dt.datetime.today() if args["end_date"] is None \
+            else dt.datetime.strptime(args["end_date"], args["date_format"])
+
+    weekly_p_l = dict()
+    while start_date + time_delta < last_date:
+        weekly_p_l[DateRange(start_date, start_date + time_delta)] = CreditDebit()
+        start_date += time_delta
+
+    weekly_p_l[DateRange(start_date, last_date, True)] = CreditDebit()
+
+    return weekly_p_l
 
 
 def read_excel(sheet_path, weekly_p_l, skip_sheets=[], skip_actions=[]):
@@ -44,4 +104,3 @@ def read_excel(sheet_path, weekly_p_l, skip_sheets=[], skip_actions=[]):
         total += p[1].sum()
 
     print("total:", total)
-    sys.exit(0)
