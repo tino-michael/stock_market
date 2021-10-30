@@ -13,7 +13,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-x", "--excel_sheet", type=str, default=None)
 ap.add_argument("-d", "--csv_directory", type=str, default=None)
 ap.add_argument("--tickers", nargs='*', type=str, default=[])
-ap.add_argument("-s", "--start_date", type=str, required=True)
+ap.add_argument("-s", "--start_date", type=str, default=None)
 ap.add_argument("-e", "--end_date", type=str, default=None)
 ap.add_argument("-f", "--date_format", type=str, default="%Y-%m-%d")
 ap.add_argument("-a", "--skip_actions", nargs='*', type=str)
@@ -30,9 +30,6 @@ args = vars(ap.parse_args())
 
 # getting interval string; weekly is default
 interval = ([ key for key in ["daily",  "weekly", "monthly", "quarterly"] if args[key] ] + ["weekly"])[0]
-
-
-data_map = {}
 
 # reading in the data
 if args["excel_sheet"] is not None:

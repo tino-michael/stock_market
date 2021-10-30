@@ -2,6 +2,10 @@ import os
 import pandas as pd
 
 def read_csv_file(filepath):
+    """
+    Reads a single csv file and imports its data into a pandas data frame.
+    "Number of shares" and "Share Price" columns are consolidated into a "Total Value" column.
+    """
     read_data = pd.read_csv(filepath, skip_blank_lines=True)
 
     try:
@@ -24,6 +28,10 @@ def read_csv_file(filepath):
     return ret_data
 
 def read_csv_dir(dirpath, tickers=None):
+    """
+    Reads all csv files in the given directory and imports their data into a map of pandas
+    data frames. If `tickers` is given, only consider files with basenames in that list.
+    """
 
     data_dict = {}
     tickers = [x.upper() for x in tickers]

@@ -11,7 +11,8 @@ importing of the excel sheet became unbearably long.
 So I exported my data into `csv` files and rewrote the script so it would read those instead.
 (It still can read the excel sheet though it is no longer my preferred method.)
 Importing the data from all the `csv`s is much faster and I can much easier switch between different
-tickers (by fuzzy-finding the file instead of scrolling through the spreadsheet tab bar and clicking).
+tickers (by fuzzy-finding the file inside my texteditor instead of scrolling through the spreadsheet
+tab bar and clicking).
 For now, I will keep the old "Usage" section here at the bottom but consider it "legacy" and won't
 update it.
 
@@ -40,12 +41,14 @@ price I paid goes as a *negative* number into the share price column.
 
 ### Dates
 
-The script expects a starting date with the `-s` flag; an end date with `-e` is optional.
-If no end date is given, the current date is assumed.
-I might change this at some point so that dates might be inferred from the data itself...
+The start and end dates for the tally are inferred from the provided data.
+You can narrow the time frame with the `-s, --start_date` and `-e, --end_date` flags.
 The given dates are by default expected in ISO format: "YYYY-MM-DD", though the format can be
 changed with the `-f` flag (format string according to python's `datetime`).
-As one might guess, the start and end dates define the time span for which the data is evaluated.
+The time intervals (weeks, months etc.) are constructed using `pandas`.
+That means that when you are, e.g., looking into weekly tallies, the constructed weeks will be
+"calendar weeks" and your first week will be the one that starts with a Monday and contains your
+`start_date`.
 
 ### Data Source
 
@@ -64,7 +67,6 @@ You can use `-a` to ignore entries whose "Action" entry `starts_with` any provid
 - [ ] adjusted cost-basis calculation similar to what is done in the Google sheet
 - [x] add `daily`, `weekly`, `monthly`, `quarterly`, `yearly` flags
 - [x] be smarter about time-range calculations: completely done in pandas now
-
 
 ## Wrapping up
 

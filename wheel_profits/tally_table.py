@@ -2,6 +2,11 @@ import pandas as pd
 
 
 def get_tally_table(df, interval, start_date=None, end_date=None, format=None):
+    """
+    Aggregates trade values from the input data frame `df` and puts them into a tally data frame.
+    It sums up credits, debits and profits/losses within a time period given by `intervall`.
+    Start and end date are either given or inferred from the earliest and latest date in `df`.
+    """
 
     df["Date"] = pd.to_datetime(df['Date'], format=format)
 
