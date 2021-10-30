@@ -24,7 +24,8 @@ or separate in time instead (e.g. each month its own file).
 The files are expected to contain comma separated tables with the first line for the header.
 The files are imported by `pandas` and the columns referred to by **name**, so make sure that the
 following names are present:
-```Action,Date,# of Shares,Share Price,Status
+```
+Action,Date,# of Shares,Share Price,Status
 ```
 Additional columns and order don't matter.
 
