@@ -64,7 +64,9 @@ You can use `-a` to ignore entries whose "Action" entry `starts_with` any provid
 
 ## TODOs
 
-- [ ] adjusted cost-basis calculation similar to what is done in the Google sheet
+- [x] adjusted cost-basis calculation similar to what is done in the Google sheet: 
+    realised in separate `adjusted_cost_basis.py`
+- [ ] expand README for `adjusted_cost_basis.py`
 - [x] add `daily`, `weekly`, `monthly`, `quarterly`, `yearly` flags
 - [x] be smarter about time-range calculations: completely done in pandas now
 
