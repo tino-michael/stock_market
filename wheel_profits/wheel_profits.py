@@ -19,11 +19,11 @@ ap.add_argument("-f", "--date_format", type=str, default="%Y-%m-%d")
 ap.add_argument("-a", "--skip_actions", nargs='*', type=str)
 ap.add_argument("-t", "--skip_sheets", nargs='*', type=str)
 
-tgroup = ap.add_mutually_exclusive_group
-ap.add_argument("--daily", default=False, action='store_true')
-ap.add_argument("--weekly", default=False, action='store_true')
-ap.add_argument("--monthly", default=False, action='store_true')
-ap.add_argument("--quarterly", default=False, action='store_true')
+tgroup = ap.add_mutually_exclusive_group()
+tgroup.add_argument("--daily", default=False, action='store_true')
+tgroup.add_argument("--weekly", default=False, action='store_true')
+tgroup.add_argument("--monthly", default=False, action='store_true')
+tgroup.add_argument("--quarterly", default=False, action='store_true')
 
 args = vars(ap.parse_args())
 
