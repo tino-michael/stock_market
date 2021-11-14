@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import pandas as pd
-
 import argparse
 
 from read_csv_dir import read_csv_dir
@@ -57,5 +56,7 @@ if args["skip_actions"]:
 
 tally_table = get_tally_table(data_frame, interval, args["start_date"], args["end_date"], format=args["date_format"])
 
+print()
 print(tally_table)
 print("\ntotal:", tally_table["Profit"].sum())
+print()
