@@ -62,7 +62,7 @@ def get_acb_table(data_map):
         tally["Shares"].append(shares)
         tally["Profit"].append(profit)
         tally["Cashflow"].append(cashflow)
-        tally["Adj. Cost Basis"].append((-profit / shares) if shares > 0 else 0)
+        tally["Adj. Cost Basis"].append(-profit / shares if (shares > 0 and profit < 0) else 0)
 
     tickers = tally.pop("Ticker")
     df = pd.DataFrame(tally, index=tickers)
