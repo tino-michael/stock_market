@@ -3,9 +3,9 @@
 import pandas as pd
 import argparse
 
-from read_csv_dir import read_csv_dir
-from tally_table import get_tally_table
-import utils
+from .read.csv_dir import read_csv_dir
+from .tally.tally_table import get_tally_table
+from .utils import utils
 
 
 ap = argparse.ArgumentParser()
@@ -32,7 +32,7 @@ interval = ([ key for key in ["daily",  "weekly", "monthly", "quarterly"] if arg
 
 # reading in the data
 if args["excel_sheet"] is not None:
-    from read_excel import read_excel, get_weekly_p_l
+    from read.excel import read_excel, get_weekly_p_l
     # read in the excel spreadsheets document
     workbook = args["excel_sheet"]
     weekly_p_l = get_weekly_p_l(args)

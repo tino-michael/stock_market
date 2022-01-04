@@ -5,8 +5,8 @@ Reads the csv files from a given directory and prints the assigned shares, adjus
 and other metrics per ticker symbol.
 """
 
-from read_csv_dir import read_csv_dir
-from tally_table import get_acb_table
+from .read.csv_dir import read_csv_dir
+from .tally.tally_table import get_acb_table
 import argparse
 
 ap = argparse.ArgumentParser()
