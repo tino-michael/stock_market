@@ -1,6 +1,6 @@
 import pandas as pd
 
-import utils
+from ..utils import utils
 
 
 def get_tally_table(df, interval, start_date=None, end_date=None, format=None):
