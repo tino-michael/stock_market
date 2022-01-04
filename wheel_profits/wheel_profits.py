@@ -5,8 +5,7 @@ import argparse
 
 from .read.csv_dir import read_csv_dir
 from .tally.tally_table import get_tally_table
-from .utils import utils
-
+from .utils import utils, new_ticker
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-x", "--excel_sheet", type=str, default=None)
@@ -18,6 +17,9 @@ ap.add_argument("-f", "--date_format", type=str, default="%Y-%m-%d")
 ap.add_argument("-a", "--skip_actions", nargs='*', type=str)
 ap.add_argument("-t", "--skip_sheets", nargs='*', type=str)
 
+ap.add_argument("-n", "--new", type=str,
+        help="create a new blank file for a given ticker symbol with only the csv header")
+
 tgroup = ap.add_mutually_exclusive_group()
 tgroup.add_argument("--daily", default=False, action='store_true')
 tgroup.add_argument("--weekly", default=False, action='store_true')
@@ -26,6 +28,9 @@ tgroup.add_argument("--quarterly", default=False, action='store_true')
 
 args = vars(ap.parse_args())
 
+if args["new"]:
+    new_ticker.new_ticker(args["new"], args["csv_directory"])
+    exit(0)
 
 # getting interval string; weekly is default
 interval = ([ key for key in ["daily",  "weekly", "monthly", "quarterly"] if args[key] ] + ["weekly"])[0]
