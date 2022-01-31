@@ -35,20 +35,6 @@ if args["new"]:
 # returns a dictionary with ticker symbol als key and pandas data frame as values
 data_map = read_csv_dir(args["csv_directory"], args["tickers"])
 
-# get the data frame with the adjusted cost basis for the requested ticker symbols
-tally_table = get_acb_table(data_map)
-
-# filter for assigned or unassigned positions if requested
-if args["assigned"]:
-    tally_table = tally_table[tally_table.loc[:, "Shares"] > 0]
-if args["unassigned"]:
-    tally_table = tally_table[tally_table.loc[:, "Shares"] == 0]
-
-print()
-print(tally_table.sort_index())
-print("\ntotal:", tally_table["Cashflow"].sum())
-print()
-
 # getting interval string; weekly is default
 interval = ([ key for key in ["daily",  "weekly", "monthly", "quarterly"] if args[key] ] + ["weekly"])[0]
 
