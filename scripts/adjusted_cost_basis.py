@@ -5,9 +5,9 @@ Reads the csv files from a given directory and prints the assigned shares, adjus
 and other metrics per ticker symbol.
 """
 
-from .read.csv_dir import read_csv_dir
-from .tally.tally_table import get_acb_table
-from .utils import new_ticker
+from stock_market.read.csv_dir import read_csv_dir_wheel as read_csv_dir
+from stock_market.tally.tally_table import get_acb_table
+from stock_market.utils import new_ticker_wheel as new_ticker
 import argparse
 
 ap = argparse.ArgumentParser()
@@ -30,7 +30,7 @@ if args["csv_directory"] is None:
     exit(-1)
 
 if args["new"]:
-    new_ticker.new_ticker(args["new"], args["csv_directory"])
+    new_ticker(args["new"], args["csv_directory"])
     exit(0)
 
 # returns a dictionary with ticker symbol als key and pandas data frame as values

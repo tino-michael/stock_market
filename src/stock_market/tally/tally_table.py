@@ -6,7 +6,7 @@ from ..utils import utils
 def get_tally_table(df, interval, start_date=None, end_date=None, format=None):
     """
     Aggregates trade values from the input data frame `df` and puts them into a tally data frame.
-    It sums up credits, debits and profits/losses within a time period given by `intervall`.
+    It sums up credits, debits and profits/losses within a time period given by `interval`.
     Start and end date are either given or inferred from the earliest and latest date in `df`.
     """
 
@@ -69,3 +69,34 @@ def get_acb_table(data_map):
 
     pd.set_option('precision',2)
     return df
+
+
+
+def get_dividend_tally(df, interval, start_date=None, end_date=None, format=None):
+    """
+    Start and end date are either given or inferred from the earliest and latest date in `df`.
+    """
+
+    df["Pay Date"] = pd.to_datetime(df["Pay Date"], format=format)
+
+    if start_date is None:
+        start_date = df["Pay Date"].min()
+    if end_date is None:
+        end_date = df["Pay Date"].max()
+
+    # get the frequency character for pandas ("quarterly" converts to "3 months")
+    freq = interval[0].upper()
+    if freq == "Q": freq = "3M"
+
+    range = pd.period_range(start=start_date, end=end_date, freq=freq)
+
+    tally_frame = pd.DataFrame(
+        columns=["Dividends"],
+        index=range
+    ).fillna(0)
+
+    for idx, row in tally_frame.iterrows():
+        pdf = df[df["Pay Date"].between(idx.start_time, idx.end_time)]
+        row["Dividends"] = pdf["Total"].sum()
+
+    return tally_frame

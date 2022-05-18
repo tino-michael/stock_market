@@ -3,9 +3,9 @@
 import pandas as pd
 import argparse
 
-from .read.csv_dir import read_csv_dir
-from .tally.tally_table import get_tally_table
-from .utils import utils, new_ticker
+from stock_market.read.csv_dir import read_csv_dir_wheel as read_csv_dir
+from stock_market.tally.tally_table import get_tally_table
+from stock_market.utils import skip_actions, new_ticker_wheel as new_ticker
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-x", "--excel_sheet", type=str, default=None)
@@ -29,11 +29,8 @@ tgroup.add_argument("--quarterly", default=False, action='store_true')
 args = vars(ap.parse_args())
 
 if args["new"]:
-    new_ticker.new_ticker(args["new"], args["csv_directory"])
+    new_ticker(args["new"], args["csv_directory"])
     exit(0)
-
-# returns a dictionary with ticker symbol als key and pandas data frame as values
-data_map = read_csv_dir(args["csv_directory"], args["tickers"])
 
 # getting interval string; weekly is default
 interval = ([ key for key in ["daily",  "weekly", "monthly", "quarterly"] if args[key] ] + ["weekly"])[0]
@@ -60,7 +57,7 @@ data_frame = pd.concat([df for df in data_map.values()])
 # if one is only interested in cash flow from options, e.g. buy, sell and LEAPS actions
 # can be excluded here
 if args["skip_actions"]:
-    data_frame = utils.skip_actions(data_frame, args["skip_actions"])
+    data_frame = skip_actions(data_frame, args["skip_actions"])
 
 tally_table = get_tally_table(data_frame, interval, args["start_date"], args["end_date"], format=args["date_format"])
 
