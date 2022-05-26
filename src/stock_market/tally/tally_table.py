@@ -21,22 +21,22 @@ def get_tally_table(df, interval, start_date=None, end_date=None, format=None):
     freq = interval[0].upper()
     if freq == "Q": freq = "3M"
 
-    range = pd.period_range(start=start_date, end=end_date, freq=freq)
+    date_range = pd.period_range(start=start_date, end=end_date, freq=freq)
 
     tally_frame = pd.DataFrame(
         columns=["Debit", "Credit", "Profit"],
-        index=range
+        index=date_range
     ).fillna(0)
 
-    for idx, row in tally_frame.iterrows():
+    for idx in tally_frame.index:
         pdf = df[df["Date"].between(idx.start_time, idx.end_time)]
         tv = pdf["Total Value"]
         credits = tv[tv < 0].sum()
         debits = tv[tv > 0].sum()
 
-        row["Credit"] = credits
-        row["Debit"] = debits
-        row["Profit"] = debits + credits
+        tally_frame.loc[idx] = pd.Series(
+            data=[credits, debits, credits+debits],
+            index=["Credit", "Debit", "Profit"])
 
     return tally_frame
 
