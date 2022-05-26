@@ -1,5 +1,7 @@
-from ..tally_table import get_tally_table
+from stock_market.read.csv_dir import read_csv_file_wheel
+from stock_market.tally.tally_table import get_tally_table
 
+import os
 import pandas as pd
 
 def test_import():
@@ -57,3 +59,20 @@ def test_start_week():
     idxs = tf.index
     assert idxs.min().start_time.dayofweek == 0
     assert idxs.min().end_time.dayofweek == 6
+
+
+def test_data1():
+    """
+    Initially, here the last write-close would not be recognized...
+    """
+
+    file_path = os.path.dirname(__file__)
+    data_path = os.path.join(file_path, "data", "test_data1.csv")
+
+    df = read_csv_file_wheel(data_path)
+    tf = get_tally_table(df, "monthly")
+    print(tf)
+
+    assert tf["Debit"].sum() == 240
+    assert tf["Credit"].sum() == -70
+    assert tf["Profit"].sum() == 170

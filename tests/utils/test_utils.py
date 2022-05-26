@@ -1,4 +1,4 @@
-from ..utils import get_owned_shares
+from stock_market.utils import get_owned_shares
 
 import pandas as pd
 
