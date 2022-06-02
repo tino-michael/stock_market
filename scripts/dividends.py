@@ -42,3 +42,5 @@ data_frame = pd.concat([df for df in data_map.values()])
 div_table = get_dividend_tally(data_frame, interval)
 
 print(div_table)
+print("\ntotal:", div_table["Dividends"].sum())
+print()

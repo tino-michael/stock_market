@@ -95,8 +95,8 @@ def get_dividend_tally(df, interval, start_date=None, end_date=None, format=None
         index=range
     ).fillna(0)
 
-    for idx, row in tally_frame.iterrows():
+    for idx in tally_frame.index:
         pdf = df[df["Pay Date"].between(idx.start_time, idx.end_time)]
-        row["Dividends"] = pdf["Total"].sum()
+        tally_frame.loc[idx, "Dividends"] = pdf["Total"].sum()
 
     return tally_frame
