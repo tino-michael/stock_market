@@ -37,11 +37,11 @@ interval = ([ key for key in ["daily",  "weekly", "monthly", "quarterly"] if arg
 
 # reading in the data
 if args["excel_sheet"] is not None:
-    from read.excel import read_excel, get_weekly_p_l
+    from stock_market.read import excel
     # read in the excel spreadsheets document
     workbook = args["excel_sheet"]
-    weekly_p_l = get_weekly_p_l(args)
-    read_excel(workbook, weekly_p_l, args["skip_sheets"] or [], args["skip_actions"] or [])
+    weekly_p_l = excel.get_weekly_p_l(args)
+    excel.read_excel(workbook, weekly_p_l, args["skip_sheets"] or [], args["skip_actions"] or [])
     exit(0)
 
 if args["csv_directory"] is None:
