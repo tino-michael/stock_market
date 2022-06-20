@@ -10,6 +10,7 @@ ap.add_argument("-d", "--csv_directory", type=str, default=None)
 ap.add_argument("-f", "--files", nargs='*', type=str, default=[])
 ap.add_argument("--usd_column", type=str, default="USD Equivalent",
     help="The column name in the csv files that denotes the USD value of the received interest")
+ap.add_argument("-r", "--rates", type=str, default=None, help="csv file with conversion rates throughout the year")
 
 args = vars(ap.parse_args())
 
@@ -22,11 +23,23 @@ if args["files"]:
 
 print(f"found these files:", files)
 
-value = 0
+if args["rates"]:
+    rates_df = pd.read_csv(args["rates"], index_col="Month")
+
+total = 0
 for f in files:
-    value += pd.read_csv(f)[args["usd_column"]] \
+    df = pd.read_csv(f, parse_dates=["Date / Time"])[[args["usd_column"], "Date / Time"]]
+    df[args["usd_column"]] = df[args["usd_column"]] \
         .apply(lambda x: x.replace('$','')) \
         .apply(lambda x: x.replace(',','')) \
-        .astype(np.float64).sum()
+        .astype(np.float64)
 
-print(f"{value=:.2f}")
+    if args["rates"]:
+        df = df.groupby(df["Date / Time"].dt.month)[args["usd_column"]].sum()
+        df = pd.Series(df.to_numpy() / rates_df.iloc[df.index-1, 0].to_numpy())
+    else:
+        df = df[args["usd_column"]]
+
+    total += df.sum()
+
+print(f"{total=:.2f}")
