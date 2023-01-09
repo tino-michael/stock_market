@@ -63,5 +63,5 @@ tally_table = get_tally_table(data_frame, interval, args["start_date"], args["en
 
 print()
 print(tally_table)
-print("\ntotal:", tally_table["Profit"].sum())
+print(f"\ntotal: {tally_table['Profit'].sum():.2f}")
 print()
