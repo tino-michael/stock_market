@@ -14,6 +14,7 @@ ap = argparse.ArgumentParser()
 
 ap.add_argument("-d", "--csv_directory", type=str, default=None)
 ap.add_argument("--tickers", nargs='*', type=str, default=[])
+ap.add_argument("--skip_actions", nargs='*', type=str, default=[])
 ap.add_argument("-n", "--new", type=str,
         help="create a new blank file for a given ticker symbol with only the csv header")
 
@@ -37,7 +38,7 @@ if args["new"]:
 data_map = read_csv_dir(args["csv_directory"], args["tickers"])
 
 # get the data frame with the adjusted cost basis for the requested ticker symbols
-tally_table = get_acb_table(data_map)
+tally_table = get_acb_table(data_map, args["skip_actions"])
 
 # filter for assigned or unassigned positions if requested
 if args["assigned"]:

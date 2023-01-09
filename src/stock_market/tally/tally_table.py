@@ -39,7 +39,7 @@ def get_tally_table(df, interval, start_date=None, end_date=None, format=None):
     return tally_frame
 
 
-def get_acb_table(data_map):
+def get_acb_table(data_map, skip_actions):
     """
     Build the tally table for the adjusted cost basis per stock ticker.
     The table contains the number of shares held, the total profit/loss for this position,
@@ -54,7 +54,7 @@ def get_acb_table(data_map):
     for ticker, t_data in data_map.items():
         shares = utils.get_owned_shares(t_data)
         profit = t_data["Total Value"].sum()
-        cashflow = utils.skip_actions(t_data, ["buy", "sell"])["Total Value"].sum()
+        cashflow = utils.skip_actions(t_data, skip_actions)["Total Value"].sum()
 
         tally["Ticker"].append(ticker)
         tally["Shares"].append(shares)
