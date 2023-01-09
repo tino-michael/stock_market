@@ -11,8 +11,8 @@ def read_csv_file_wheel(filepath):
     try:
         col_action = read_data.loc[:, "Action"]
         col_date = read_data.loc[:, "Date"]
-        col_value = read_data.loc[:, "# of Shares"] * read_data.loc[:, "Share Price"]
-        col_shares = read_data.loc[:, "# of Shares"]
+        col_value = read_data.loc[:, "# Shares"] * read_data.loc[:, "Share Price"]
+        col_shares = read_data.loc[:, "# Shares"]
         col_status = read_data.loc[:, "Status"]
     except KeyError:
         print("KeyError in file {}".format(filepath.split('/')[-1]))
@@ -62,10 +62,9 @@ def read_csv_file_div(filepath):
     read_data = pd.read_csv(filepath, skip_blank_lines=True).rename(columns=lambda x: x.strip())
 
     try:
-        col_ex_date = read_data.loc[:, "ex date"]
-        col_pay_date = read_data.loc[:, "pay date"]
-        col_per_share = read_data.loc[:, "div per share"]
-        col_total = read_data.loc[:, "div total"]
+        col_pay_date = read_data.loc[:, "Pay Date"]
+        col_per_share = read_data.loc[:, "Div per Share"]
+        col_total = read_data.loc[:, "Div Total"]
     except KeyError:
         print("KeyError in file {}".format(filepath.split('/')[-1]))
         print("formatting error?")

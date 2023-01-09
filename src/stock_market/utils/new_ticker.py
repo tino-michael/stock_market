@@ -1,7 +1,7 @@
 import os
 
-CSV_HEADER_WHEEL = "Action,Date,# of Shares,Share Price,Status"
-CSV_HEADER_DIV = "ex date,pay date,div per share,# of shares,div total"
+CSV_HEADER_WHEEL = "Action,Date,# Shares,Share Price,Status"
+CSV_HEADER_DIV = "Pay Date,Div per Share,# Shares,Div Total"
 
 def new_ticker_wheel(ticker : str, target_dir : str):
     """
