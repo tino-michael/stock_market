@@ -65,9 +65,7 @@ def get_acb_table(data_map, skip_actions):
     tickers = tally.pop("Ticker")
     df = pd.DataFrame(tally, index=tickers)
 
-    pd.set_option('precision',2)
     return df
-
 
 
 def get_dividend_tally(df, interval, start_date=None, end_date=None, format=None):
