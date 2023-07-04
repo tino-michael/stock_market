@@ -18,8 +18,8 @@ In one of his video tutorials, Adam presented the "Wheel" strategy for stock opt
 and provided a link to a Google spreadsheet in which he suggests you write down your trades
 and track your progress.
 
-Initially, I was indeed Adam's spreadsheet and wrote this script to read it in an get some more
-insight into the data. At some point, reading in the sheet became way to slow, so I moved
+Initially, I was indeed using Adam's spreadsheet and wrote this script to read it in an get some
+more insight into the data. At some point, reading in the sheet became way too slow, so I moved
 to a text-based `.csv` system and adapted my script to read in those.
 (It still can read the excel sheet, though it is no longer my preferred method and the code
 no longer maintained.)
@@ -39,7 +39,7 @@ following names are present:
 ```
 Action,Date,# of Shares,Share Price,Status
 ```
-Additional columns and order don't matter.
+Additional columns and order don't matter. So you could, e.g., add a "Notes" column if you like.
 The script provides a `--new <ticker_name>` flag to create an otherwise empty file with a compliant
 header for you.
 
