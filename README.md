@@ -18,7 +18,7 @@ In one of his video tutorials, Adam presented the "Wheel" strategy for stock opt
 and provided a link to a Google spreadsheet in which he suggests you write down your trades
 and track your progress.
 
-Initially, I was indeed using Adam's spreadsheet and wrote this script to read it in an get some
+Initially, I was indeed using Adam's spreadsheet and wrote this script to read it in and get some
 more insight into the data. At some point, reading in the sheet became way too slow, so I moved
 to a text-based `.csv` system and adapted my script to read in those.
 (It still can read the excel sheet, though it is no longer my preferred method and the code
