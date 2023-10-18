@@ -73,7 +73,7 @@ def get_dividend_tally(df, interval, start_date=None, end_date=None, format=None
     Start and end date are either given or inferred from the earliest and latest date in `df`.
     """
 
-    df["Pay Date"] = pd.to_datetime(df["Pay Date"], format=format)
+    df["Pay Date"] = [pd.to_datetime(d, format=format) for d in df["Pay Date"]]
 
     if start_date is None:
         start_date = df["Pay Date"].min()
