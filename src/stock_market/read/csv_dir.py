@@ -1,19 +1,22 @@
 import os
 import pandas as pd
 
+
 def read_csv_file_wheel(filepath):
     """
     Reads a single csv file and imports its data into a pandas data frame.
     "Number of shares" and "Share Price" columns are consolidated into a "Total Value" column.
     """
-    read_data = pd.read_csv(filepath, skip_blank_lines=True).rename(columns=lambda x: x.strip())
+    read_data = pd.read_csv(filepath, skip_blank_lines=True)\
+        .rename(columns=lambda x: x.strip())
+    read_data = read_data[read_data["Date"].notna()]
 
     try:
-        col_action = read_data.loc[:, "Action"]
-        col_date = read_data.loc[:, "Date"]
+        col_action = read_data.loc[:, "Action"].str.strip()
+        col_date = read_data.loc[:, "Date"].str.strip()
         col_value = read_data.loc[:, "# Shares"] * read_data.loc[:, "Share Price"]
         col_shares = read_data.loc[:, "# Shares"]
-        col_status = read_data.loc[:, "Status"]
+        col_status = read_data.loc[:, "Status"].str.strip()
     except KeyError:
         print("KeyError in file {}".format(filepath.split('/')[-1]))
         print("formatting error?")
@@ -29,6 +32,7 @@ def read_csv_file_wheel(filepath):
 
     return ret_data
 
+
 def read_csv_dir_wheel(dirpath, tickers=None):
     """
     Reads all csv files in the given directory and imports their data into a map of pandas
@@ -39,7 +43,8 @@ def read_csv_dir_wheel(dirpath, tickers=None):
     tickers = [x.upper() for x in tickers]
 
     for file_name in os.listdir(dirpath):
-        if not file_name.endswith('csv'): continue
+        if not file_name.endswith('csv'):
+            continue
 
         ticker = os.path.splitext(file_name)[0].upper()
 
@@ -51,7 +56,6 @@ def read_csv_dir_wheel(dirpath, tickers=None):
         data_dict[ticker] = df
 
     return data_dict
-
 
 
 def read_csv_file_div(filepath):
@@ -89,7 +93,8 @@ def read_csv_dir_div(dirpath, tickers=None):
     tickers = [x.upper() for x in tickers]
 
     for file_name in os.listdir(dirpath):
-        if not file_name.endswith('csv'): continue
+        if not file_name.endswith('csv'):
+            continue
 
         ticker = os.path.splitext(file_name)[0].upper()
 

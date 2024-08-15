@@ -17,8 +17,9 @@ ap.add_argument("-f", "--date_format", type=str, default="%Y-%m-%d")
 ap.add_argument("-a", "--skip_actions", nargs='*', type=str)
 ap.add_argument("-t", "--skip_sheets", nargs='*', type=str)
 
-ap.add_argument("-n", "--new", type=str,
-        help="create a new blank file for a given ticker symbol with only the csv header")
+ap.add_argument(
+    "-n", "--new", type=str,
+    help="create a new blank file for a given ticker symbol with only the csv header")
 
 tgroup = ap.add_mutually_exclusive_group()
 tgroup.add_argument("--daily", default=False, action='store_true')
@@ -33,7 +34,9 @@ if args["new"]:
     exit(0)
 
 # getting interval string; weekly is default
-interval = ([ key for key in ["daily",  "weekly", "monthly", "quarterly"] if args[key] ] + ["weekly"])[0]
+interval = (
+    [key for key in ["daily", "weekly", "monthly", "quarterly"] if args[key]] + ["weekly"]
+)[0]
 
 # reading in the data
 if args["excel_sheet"] is not None:

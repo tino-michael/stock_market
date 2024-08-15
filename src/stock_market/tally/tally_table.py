@@ -19,14 +19,15 @@ def get_tally_table(df, interval, start_date=None, end_date=None, format=None):
 
     # get the frequency character for pandas ("quarterly" converts to "3 months")
     freq = interval[0].upper()
-    if freq == "Q": freq = "3M"
+    if freq == "Q": 
+        freq = "3M"
 
     date_range = pd.period_range(start=start_date, end=end_date, freq=freq)
 
     tally_frame = pd.DataFrame(
         columns=["Debit", "Credit", "Profit"],
         index=date_range
-    ).fillna(0)
+    )
 
     for idx in tally_frame.index:
         pdf = df[df["Date"].between(idx.start_time, idx.end_time)]
@@ -34,7 +35,8 @@ def get_tally_table(df, interval, start_date=None, end_date=None, format=None):
         credits = tv[tv < 0].sum()
         debits = tv[tv > 0].sum()
 
-        tally_frame.loc[idx, ["Credit", "Debit", "Profit"]] = [credits, debits, credits+debits]
+        tally_frame.loc[idx, ["Credit", "Debit", "Profit"]] = \
+            [credits, debits, credits + debits]
 
     return tally_frame
 
@@ -88,7 +90,8 @@ def get_dividend_tally(df, interval, start_date=None, end_date=None, format=None
 
     tally_frame = pd.DataFrame(
         columns=["Dividends"],
-        index=date_range
+        index=date_range,
+        dtype=float
     ).fillna(0)
 
     for idx in tally_frame.index:
