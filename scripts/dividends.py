@@ -23,10 +23,10 @@ ap.add_argument("-e", "--end_date", type=str, default=None)
 ap.add_argument("-p", "--plot", default=False, action='store_true')
 
 tgroup = ap.add_mutually_exclusive_group()
-tgroup.add_argument("--monthly", default=False, action='store_true')
-tgroup.add_argument("--quarterly", default=False, action='store_true')
-tgroup.add_argument("--yearly", default=False, action='store_true')
-tgroup.add_argument("--total", default=False, action='store_true')
+tgroup.add_argument("-m", "--monthly", default=False, action='store_true')
+tgroup.add_argument("-q", "--quarterly", default=False, action='store_true')
+tgroup.add_argument("-y", "--yearly", default=False, action='store_true')
+tgroup.add_argument("-a", "--total", default=False, action='store_true')
 
 args = vars(ap.parse_args())
 
