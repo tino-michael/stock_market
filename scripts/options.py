@@ -12,7 +12,7 @@ from stock_market.tally import (
     filter_tickers, filter_dates
 )
 
-from stock_market.utils import new_ticker_wheel as new_ticker
+from stock_market.utils import new_ticker_options as new_ticker
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--csv_directory", type=str, default=None)
@@ -25,10 +25,12 @@ ap.add_argument(
     "-n", "--new", type=str,
     help="create a new blank file for a given ticker symbol with only the csv header")
 
+ap.add_argument("-l", "--last", default=None, type=int)
+
 tgroup = ap.add_mutually_exclusive_group()
-tgroup.add_argument("--monthly", default=False, action='store_true')
-tgroup.add_argument("--quarterly", default=False, action='store_true')
-tgroup.add_argument("--yearly", default=False, action='store_true')
+tgroup.add_argument("-m", "--monthly", default=False, action='store_true')
+tgroup.add_argument("-q", "--quarterly", default=False, action='store_true')
+tgroup.add_argument("-y", "--yearly", default=False, action='store_true')
 tgroup.add_argument("--total", default=False, action='store_true')
 
 args = vars(ap.parse_args())
@@ -49,22 +51,24 @@ if args["start_date"] or args["end_date"]:
 if args["skip_actions"]:
     options = skip_actions(options, args["skip_actions"])
 
-# sum up dividends over the desired intervall (monthly by default)
-for i, f in [
+# sum up options profit over the desired intervall
+# (monthly by default, i.e. last entry in option list)
+for i, func in [
     ("total", sum_total),
     ("yearly", sum_yearly),
     ("quarterly", sum_quarterly),
     ("monthly", sum_monthly),
 ]:
     if args[i]:
-        opts = f(options, "profit")
+        # `func` is now the function given by CLI arg,
+        # so just exit the loop now (`func` keeps being set)
         break
-    else:
-        opts = sum_monthly(options, "profit")
+
+opts = func(options, "profit", last=args["last"])
 
 # and print the resulting table
 print(opts)
 
 # if not explicitly asked for, also print yearly tally
-if f is not sum_yearly:
+if func is not sum_yearly:
     print(sum_yearly(options, "profit"))
