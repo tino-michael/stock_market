@@ -5,7 +5,7 @@ def skip_actions(df, actions, action_column="Action"):
     """
 
     for skip in actions:
-        df = df[df.loc[:, action_column].str.contains(skip)==False]
+        df = df[df.loc[:, action_column].str.contains(skip) == False]
 
     return df
 
@@ -13,7 +13,7 @@ def skip_actions(df, actions, action_column="Action"):
 def get_owned_shares(
         df,
         buy_actions=["buy"], sell_actions=["sell"],
-        action_column="Action", n_shares_column="Shares"):
+        action_column="Action", n_shares_column="# Shares"):
     """
     Returns the number of shares owned from the given data frame.
     The strings in `buy_actions` and `sell_actions` are searched for in the `action_column` and

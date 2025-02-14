@@ -19,7 +19,7 @@ def get_tally_table(df, interval, start_date=None, end_date=None, format=None):
 
     # get the frequency character for pandas ("quarterly" converts to "3 months")
     freq = interval[0].upper()
-    if freq == "Q": 
+    if freq == "Q":
         freq = "3M"
 
     date_range = pd.period_range(start=start_date, end=end_date, freq=freq)

@@ -7,7 +7,7 @@ and other metrics per ticker symbol.
 
 from stock_market.read.csv_dir import read_csv_dir_wheel as read_csv_dir
 from stock_market.tally.tally_table import get_acb_table
-from stock_market.utils import new_ticker_wheel as new_ticker
+from stock_market.utils import new_ticker_options as new_ticker
 import argparse
 
 ap = argparse.ArgumentParser()
@@ -15,14 +15,17 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--csv_directory", type=str, default=None)
 ap.add_argument("--tickers", nargs='*', type=str, default=[])
 ap.add_argument("--skip_actions", nargs='*', type=str, default=[])
-ap.add_argument("-n", "--new", type=str,
-        help="create a new blank file for a given ticker symbol with only the csv header")
+ap.add_argument(
+    "-n", "--new", type=str,
+    help="create a new blank file for a given ticker symbol with only the csv header")
 
 agroup = ap.add_mutually_exclusive_group()
-agroup.add_argument("-a", "--assigned", default=False, action='store_true',
-        help="show only assigned positions (holding sahres)")
-agroup.add_argument("-u", "--unassigned", default=False, action='store_true',
-        help="show only unassigned positions (holding no shares)")
+agroup.add_argument(
+    "-a", "--assigned", default=False, action='store_true',
+    help="show only assigned positions (holding shares)")
+agroup.add_argument(
+    "-u", "--unassigned", default=False, action='store_true',
+    help="show only unassigned positions (holding no shares)")
 
 args = vars(ap.parse_args())
 

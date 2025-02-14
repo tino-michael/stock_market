@@ -27,7 +27,7 @@ def read_csv_file_wheel(filepath):
             "Action": col_action,
             "Date": col_date,
             "Total Value": col_value,
-            "Shares": col_shares,
+            "# Shares": col_shares,
             "Status": col_status})
 
     return ret_data
