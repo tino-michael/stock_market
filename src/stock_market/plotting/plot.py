@@ -32,23 +32,26 @@ def plot(df: pl.DataFrame, calc_yoy=False):
 
     ax.tick_params(axis='x', rotation=45)
     ax.set_xlabel("Year - Quarter")
+    ax.grid(axis="y")
 
     if calc_yoy:
-        yoy = []
-        divs = df_total["dividends"]
-        for i, row in enumerate(divs[4:]):
-            yoy.append(row/divs[i])
+        yoy_incrs = []
+        yoy_dates = []
+        yoy_start = 14
+        for i, (date, div) in enumerate(df_total.rows()[yoy_start:], start=yoy_start-4):
+            yoy_incrs.append(div/df_total["dividends"][i]-1)
+            yoy_dates.append(date)
 
         ax2 = ax.twinx()
 
         sb.lineplot(
-            x=df_total["date"][4:],
-            y=yoy,
+            x=yoy_dates,
+            y=yoy_incrs,
             color="red",
             ax=ax2
         )
 
-        ax2.set_ylabel("Year over Year change")
+        ax2.set_ylabel("rel. Year over Year increase")
         ax2.yaxis.label.set_color('red')
         ax2.tick_params(axis='y', colors='red')
         ax2.set_ylim([0, None])

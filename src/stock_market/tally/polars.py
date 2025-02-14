@@ -1,4 +1,5 @@
 from typing import Iterable
+import polars as pl
 
 
 def filter_tickers(df, tickers: Iterable[str]):
@@ -27,8 +28,8 @@ def filter_dates(df, start_date: str, end_date: str):
     return df
 
 
-def sum_monthly(df, which: str):
-    return df.sql(f"""
+def sum_monthly(df, which: str, yoy: bool = False, last: int = None):
+    df = df.sql(f"""
         select date, sum({which}), currency
         from self
         group by
@@ -37,9 +38,23 @@ def sum_monthly(df, which: str):
         order by 1, currency
     """)
 
+    if yoy:
+        df = add_yoy_column(df, which, 12).sort(["date", "currency"])
 
-def sum_quarterly(df, which: str):
-    return df.sql(f"""
+    if last:
+        sort_dates = sorted(df["date"].unique())
+        last = min(last, len(sort_dates))
+        first_date = sort_dates[-last]
+        df = df.sql(f"""
+            select * from self
+            where date >= '{first_date}'
+        """)
+
+    return df
+
+
+def sum_quarterly(df, which: str, yoy: bool = False, last: int = None):
+    df = df.sql(f"""
         with grouping as (
             select *,
                 date_part('year', date(date)) as year,
@@ -52,9 +67,23 @@ def sum_quarterly(df, which: str):
         order by year, quarter, currency
     """)
 
+    if yoy:
+        df = add_yoy_column(df, which, 4).sort(["year", "quarter", "currency"])
 
-def sum_yearly(df, which: str):
-    return df.sql(f"""
+    if last:
+        sort_dates = df[["year", "quarter"]].unique().sql("""select * from self order by year, quarter""")
+        last = min(last, len(sort_dates))
+        (ye, qa) = sort_dates[-last]
+        df = df.sql(f"""
+            select * from self
+            where concat(year, quarter) >= concat('{ye[0]}', '{qa[0]}')
+        """)
+
+    return df
+
+
+def sum_yearly(df, which: str, yoy: bool = False, last: int = None):
+    df = df.sql(f"""
         with grouping as (
             select *,
                 date_part('year', date(date)) as year,
@@ -66,8 +95,13 @@ def sum_yearly(df, which: str):
         order by year, currency
     """)
 
+    if yoy:
+        df = add_yoy_column(df, which, 1).sort(["year", "currency"])
 
-def sum_total(df, which: str):
+    return df
+
+
+def sum_total(df, which: str, yoy: bool = False):
     return df.sql(f"""
         with grouping as (
             select *,
@@ -82,3 +116,22 @@ def sum_total(df, which: str):
         order by currency
 
     """)
+
+
+def add_yoy_column(df: pl.DataFrame, which: str, shift: int):
+    """
+    Add a percentage gain year-over-year column to the dataframe.
+    The gain is calculate relative to the value `shift` rows before;
+    meaning shift=1 for yearly, =4 for quarterly, =12 for monthly tallies.
+    The calculation is performed separately for each unique currency found in the frame.
+    Resulting frames are concatenated again and so might still need sorting afterwards.
+    """
+    def _add_yoy(df):
+        return df.with_columns((
+                100 * (df[which] - df[which].shift(shift))/df[which].shift(shift)
+            ).alias("YoY / %"))
+
+    return pl.concat([
+        _add_yoy(df.filter(pl.col("currency") == cur))
+        for cur in df["currency"].unique()
+    ])
