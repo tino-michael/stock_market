@@ -5,17 +5,19 @@ from pathlib import Path
 
 from stock_market.utils import polars_settings
 
-from stock_market.read.options import read_options_dir, skip_actions
+from stock_market.read.options import read_options_dir
 
 from stock_market.tally import (
     sum_yearly, sum_quarterly, sum_monthly, sum_total,
-    filter_tickers, filter_dates
+    filter_tickers, filter_dates,
+    filter_currencies, skip_actions
 )
 
 from stock_market.utils import new_ticker_options as new_ticker
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--csv_directory", type=str, default=None)
+ap.add_argument("-c", "--currencies", nargs='*', type=str, default=[])
 ap.add_argument("-t", "--tickers", nargs='*', type=str, default=[])
 ap.add_argument("-s", "--start_date", type=str, default=None)
 ap.add_argument("-e", "--end_date", type=str, default=None)
@@ -41,6 +43,9 @@ if args["new"]:
 
 
 options = read_options_dir(Path(args["csv_directory"]))
+
+if args["currencies"]:
+    options = filter_currencies(options, [c.upper() for c in args["currencies"]])
 
 if args["tickers"]:
     options = filter_tickers(options, set(t.upper() for t in args["tickers"]))

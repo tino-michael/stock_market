@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Collection
 import polars as pl
 
 
@@ -23,6 +23,27 @@ def filter_dates(df, start_date: str, end_date: str):
             select *
             from self
             where date(date) <= date('{start_date}')
+        """)
+
+    return df
+
+
+def filter_currencies(df, currencies: Collection[str] = []):
+    df = df.sql(f"""
+        select *
+        from self
+        where currency in {currencies}
+    """.replace("[", "(").replace("]", ")"))
+
+    return df
+
+
+def skip_actions(df, actions: Collection[str]):
+    for action in actions:
+        df = df.sql(f"""
+            select *
+            from self
+            where not action like '%{action}%'
         """)
 
     return df
