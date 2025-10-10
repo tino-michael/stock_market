@@ -32,8 +32,8 @@ def filter_currencies(df, currencies: Collection[str] = []):
     df = df.sql(f"""
         select *
         from self
-        where currency in {currencies}
-    """.replace("[", "(").replace("]", ")"))
+        where currency in {tuple(currencies)}
+    """)
 
     return df
 
@@ -48,6 +48,30 @@ def skip_actions(df, actions: Collection[str]):
 
     return df
 
+
+def sum_daily(df, which: str, yoy: bool = False, last: int = 0):
+    df = df.sql(f"""
+        select date, sum({which}), currency
+        from self
+        group by
+            date,
+            currency
+        order by 1, currency
+    """)
+
+    if yoy:
+        df = add_yoy_column(df, which, 12).sort(["date", "currency"])
+
+    if last:
+        sort_dates = sorted(df["date"].unique())
+        last = min(last, len(sort_dates))
+        first_date = sort_dates[-last]
+        df = df.sql(f"""
+            select * from self
+            where date >= '{first_date}'
+        """)
+
+    return df
 
 def sum_monthly(df, which: str, yoy: bool = False, last: int = None):
     df = df.sql(f"""

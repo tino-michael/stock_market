@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 matplotlib.use('qtagg')
 
 
-def plot(df: pl.DataFrame, calc_yoy=False):
+def plot(df: pl.DataFrame, what="dividends", calc_yoy=False):
     df = df.with_columns(pl.sql_expr("CONCAT_WS('-', year, quarter) AS date"))
 
-    df_total = df.sql("""
-        select date, sum(dividends)
+    df_total = df.sql(f"""
+        select date, sum({what})
         from self
         group by date
         order by date
@@ -18,13 +18,13 @@ def plot(df: pl.DataFrame, calc_yoy=False):
     ax = sb.barplot(
         data=df_total,
         x="date",
-        y="dividends",
+        y=what,
         label="EUR",
     )
     ax = sb.barplot(
         data=df.filter(pl.col("currency") == "USD"),
         x="date",
-        y="dividends",
+        y=what,
         label="USD",
     )
 
@@ -39,7 +39,7 @@ def plot(df: pl.DataFrame, calc_yoy=False):
         yoy_dates = []
         yoy_start = 14
         for i, (date, div) in enumerate(df_total.rows()[yoy_start:], start=yoy_start-4):
-            yoy_incrs.append(div/df_total["dividends"][i]-1)
+            yoy_incrs.append(div/df_total[what][i]-1)
             yoy_dates.append(date)
 
         ax2 = ax.twinx()
