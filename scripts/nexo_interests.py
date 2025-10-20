@@ -1,3 +1,5 @@
+#!/bin/env python
+
 import pandas as pd
 import numpy as np
 import glob
@@ -8,7 +10,8 @@ ap = argparse.ArgumentParser()
 
 ap.add_argument("-d", "--csv_directory", type=str, default=None)
 ap.add_argument("-f", "--files", nargs='*', type=str, default=[])
-ap.add_argument("--usd_column", type=str, default="USD Equivalent",
+ap.add_argument(
+    "--usd_column", type=str, default="USD Equivalent",
     help="The column name in the csv files that denotes the USD value of the received interest")
 ap.add_argument("-r", "--rates", type=str, default=None, help="csv file with conversion rates throughout the year")
 
@@ -21,7 +24,7 @@ if args["csv_directory"]:
 if args["files"]:
     files += args["files"]
 
-print(f"found these files:", files)
+print("found these files:", files)
 
 if args["rates"]:
     rates_df = pd.read_csv(args["rates"], index_col="Month")
@@ -30,8 +33,8 @@ total = 0
 for f in files:
     df = pd.read_csv(f, parse_dates=["Date / Time"])[[args["usd_column"], "Date / Time"]]
     df[args["usd_column"]] = df[args["usd_column"]] \
-        .apply(lambda x: x.replace('$','')) \
-        .apply(lambda x: x.replace(',','')) \
+        .apply(lambda x: x.replace('$', '')) \
+        .apply(lambda x: x.replace(',', '')) \
         .astype(np.float64)
 
     if args["rates"]:
