@@ -3,7 +3,7 @@ from pathlib import Path
 import polars as pl
 
 
-def read_ibkr_directory(path: Path, pattern: str = "IBRK_*"):
+def read_ibkr_directory(path: Path, pattern: str = "IBKR_*"):
 
     divi_files = path.glob(pattern)
 

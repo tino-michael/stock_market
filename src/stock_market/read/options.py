@@ -59,7 +59,7 @@ def read_options_csv(path: Path):
 
     return df
 
-def read_options_ibkr_dir(path: Path, pattern: str = "IBRK_*"):
+def read_options_ibkr_dir(path: Path, pattern: str = "IBKR_*"):
     option_files = path.glob(pattern)
 
     option_df = pl.concat([
