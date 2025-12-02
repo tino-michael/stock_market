@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     new: Optional[str] = Field(None)
     table_yoy: bool = Field(False)
     plot_yoy: bool = Field(False)
+    bar: bool = Field(True)
 
 
     daily: bool = Field(False, validation_alias='d')

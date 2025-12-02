@@ -83,14 +83,14 @@ for i, func in [
         # if no period is given through CLI, keeps the last one (i.e. monthly)
         break
 
-profits_tally = func(credits, gain_col, yoy=args.table_yoy, bar=True, last=args.last)
+profits_tally = func(credits, gain_col, yoy=args.table_yoy, bar=args.bar, last=args.last)
 
 # and print the resulting table
 print(profits_tally)
 
 # if not explicitly asked for, also print yearly tally
 if func is not sum_yearly:
-    print(sum_yearly(credits, gain_col, args.table_yoy))
+    print(sum_yearly(credits, gain_col, yoy=args.table_yoy, bar=args.bar))
 
 
 # show a plot of quarterly time-series

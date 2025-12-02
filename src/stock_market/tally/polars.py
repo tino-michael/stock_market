@@ -189,9 +189,14 @@ def add_yoy_column(df: pl.DataFrame, which: str, shift: int):
 
 def add_bar_column(df: pl.DataFrame, which: str, width: int = 15, char: str = "#"):
     maximum = df[which].max()
-    return df.with_columns((
-        (pl.col(which) / maximum * width)
-        .cast(pl.Int16)
-        .map_elements(lambda n: char * n, return_dtype=pl.Utf8)
-        ).alias("Progress")
-    )
+
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", pl.exceptions.PolarsInefficientMapWarning)
+
+        return df.with_columns((
+            (pl.col(which) / maximum * width)
+            .cast(pl.Int16)
+            .map_elements(lambda n: char * n, return_dtype=pl.Utf8)
+            ).alias("Progress")
+        )
