@@ -3,48 +3,68 @@ from pathlib import Path
 import polars as pl
 
 
-def read_ibkr_directory(path: Path, pattern: str = "IBKR_*"):
-
-    divi_files = path.glob(pattern)
-
-    divi_df = pl.concat([
-        read_ibkr_csv(f)
-        for f in divi_files
-    ])
-
-    return divi_df
+def read_ibkr_options_dir(path: Path):
+    return _read_ibkr_dir(path, function=read_ibkr_options)
 
 
-def read_ibkr_csv_2(path: Path):
-    """
-    This is not faster and less robust compared to the other version.
-    This needs the exported csv files to be pre-processed to have superfluous rows removed by hand.
-    (i.e. rows that are too short and make `read_csv` fail)
-    """
-    df = (
-        pl.read_csv(path)
-        .rename(str.strip)
-        .rename(str.lower)
-        .sql(r"""
-            select
-                currency,
-                date,
-                substr(description, 0, strpos(description, '\(')) as ticker,
-                amount as dividends
-             from self
-             where header not like '%Total%'
-        """)
+def read_ibkr_dividends_dir(path: Path):
+    return _read_ibkr_dir(path, function=read_ibkr_dividends)
+
+
+def _read_ibkr_dir(path: Path, function, pattern: str = "IBKR_*"):
+    return pl.concat(filter(lambda x: len(x), [
+        function(f) for f in path.glob(pattern)
+    ]))
+
+
+def read_ibkr_options(path: Path):
+    opt_dict = {
+        "action": [],
+        "ticker": [],
+        "currency": [],
+        "date": [],
+        "ticker": [],
+        "credit": [],
+        "status": [],
+    }
+
+    with open(path, "r") as f:
+        for line in f:
+            row = line.split(",")
+
+            if "Equity and Index Options" not in row:
+                continue
+            if row[1] == "SubTotal" or row[1] == "Total":
+                continue
+
+            ticker = row[5].split(" ")[0]
+            currency = row[4]
+            date = row[6].strip('"')
+            profit = row[10]
+
+            if profit == "0":
+                continue
+
+            opt_dict["action"].append("")
+            opt_dict["status"].append("")
+            opt_dict["ticker"].append(ticker)
+            opt_dict["currency"].append(currency)
+            opt_dict["date"].append(date)
+            opt_dict["credit"].append(profit)
+
+    df = pl.DataFrame(opt_dict)
+    df = df.with_columns(
+        pl.col("credit").cast(pl.Float64)
     )
-
     return df
 
 
-def read_ibkr_csv(path: Path):
+def read_ibkr_dividends(path: Path):
     divi_dict = {
         "currency": [],
         "date": [],
         "ticker": [],
-        "dividends": [],
+        "credit": [],
     }
 
     with open(path, "r") as f:
@@ -63,11 +83,11 @@ def read_ibkr_csv(path: Path):
             divi_dict["currency"].append(row[2])
             divi_dict["date"].append(row[3])
             divi_dict["ticker"].append(row[4].split('(')[0].strip())
-            divi_dict["dividends"].append(row[5].strip())
+            divi_dict["credit"].append(row[5].strip())
 
     df = pl.DataFrame(divi_dict)
     df = df.with_columns(
-        pl.col("dividends").cast(pl.Float64)
+        pl.col("credit").cast(pl.Float64)
     )
 
     return df
