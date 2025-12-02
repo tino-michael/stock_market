@@ -26,14 +26,6 @@ if args.new:
 
 gain_col = "credit"
 
-# TODO: use pydanitc_settings `no-...` mechanism
-if args.do_options:
-    do_what = "options"
-elif args.do_dividends:
-    do_what = "dividends"
-else:
-    do_what = "both"
-
 
 credit_dfs = []
 if args.do_options:
