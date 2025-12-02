@@ -49,7 +49,7 @@ def skip_actions(df, actions: Collection[str]):
     return df
 
 
-def sum_daily(df, which: str, yoy: bool = False, last: int = 0):
+def sum_daily(df, which: str, yoy: bool = False, bar: bool = False, last: int = 0):
     df = df.sql(f"""
         select date, sum({which}), currency
         from self
@@ -58,9 +58,6 @@ def sum_daily(df, which: str, yoy: bool = False, last: int = 0):
             currency
         order by 1, currency
     """)
-
-    if yoy:
-        df = add_yoy_column(df, which, 12).sort(["date", "currency"])
 
     if last:
         sort_dates = sorted(df["date"].unique())
@@ -73,7 +70,7 @@ def sum_daily(df, which: str, yoy: bool = False, last: int = 0):
 
     return df
 
-def sum_monthly(df, which: str, yoy: bool = False, last: int = None):
+def sum_monthly(df, which: str, yoy: bool = False, bar: bool = False, last: int = None):
     df = df.sql(f"""
         select date, sum({which}), currency
         from self
@@ -86,6 +83,9 @@ def sum_monthly(df, which: str, yoy: bool = False, last: int = None):
     if yoy:
         df = add_yoy_column(df, which, 12).sort(["date", "currency"])
 
+    if bar:
+        df = add_bar_column(df, which=which)
+
     if last:
         sort_dates = sorted(df["date"].unique())
         last = min(last, len(sort_dates))
@@ -98,7 +98,7 @@ def sum_monthly(df, which: str, yoy: bool = False, last: int = None):
     return df
 
 
-def sum_quarterly(df, which: str, yoy: bool = False, last: int = None):
+def sum_quarterly(df, which: str, yoy: bool = False, bar: bool = False, last: int = None):
     df = df.sql(f"""
         with grouping as (
             select *,
@@ -114,6 +114,9 @@ def sum_quarterly(df, which: str, yoy: bool = False, last: int = None):
 
     if yoy:
         df = add_yoy_column(df, which, 4).sort(["year", "quarter", "currency"])
+    if bar:
+        df = add_bar_column(df, which=which)
+
 
     if last:
         sort_dates = df[["year", "quarter"]].unique().sql("""select * from self order by year, quarter""")
@@ -127,7 +130,7 @@ def sum_quarterly(df, which: str, yoy: bool = False, last: int = None):
     return df
 
 
-def sum_yearly(df, which: str, yoy: bool = False, last: int = None):
+def sum_yearly(df, which: str, yoy: bool = False, bar: bool = False, last: int = None):
     df = df.sql(f"""
         with grouping as (
             select *,
@@ -142,6 +145,8 @@ def sum_yearly(df, which: str, yoy: bool = False, last: int = None):
 
     if yoy:
         df = add_yoy_column(df, which, 1).sort(["year", "currency"])
+    if bar:
+        df = add_bar_column(df, which=which)
 
     return df
 
@@ -180,3 +185,13 @@ def add_yoy_column(df: pl.DataFrame, which: str, shift: int):
         _add_yoy(df.filter(pl.col("currency") == cur))
         for cur in df["currency"].unique()
     ])
+
+
+def add_bar_column(df: pl.DataFrame, which: str, width: int = 15, char: str = "#"):
+    maximum = df[which].max()
+    return df.with_columns((
+        (pl.col(which) / maximum * width)
+        .cast(pl.Int16)
+        .map_elements(lambda n: char * n, return_dtype=pl.Utf8)
+        ).alias("Progress")
+    )
