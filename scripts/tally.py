@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import argparse
 from pathlib import Path
 from loguru import logger
 
 import polars as pl
+
+from stock_market.config import Settings
 
 from stock_market.utils import polars_settings
 from stock_market.tally import (
@@ -13,43 +14,14 @@ from stock_market.tally import (
     filter_currencies
 )
 
-ap = argparse.ArgumentParser()
-ap.add_argument("--csv_directory", type=str, default=None)
-ap.add_argument("--ibkr_directory", type=str, default=None)
-ap.add_argument("--tasty_directory", type=str, default=None)
-ap.add_argument("-c", "--currencies", nargs='*', type=str, default=[])
-ap.add_argument("-t", "--tickers", nargs='*', type=str, default=[])
-ap.add_argument("-s", "--start_date", type=str, default=None)
-ap.add_argument("-e", "--end_date", type=str, default=None)
-ap.add_argument("-p", "--plot", default=False, action='store_true')
-ap.add_argument("--plot_yoy", default=False, action='store_true')
-ap.add_argument("--table_yoy", default=False, action='store_true')
-ap.add_argument("-a", "--skip_actions", nargs='*', type=str)
-ap.add_argument(
-    "-n", "--new", type=str,
-    help="create a new blank option file for a given ticker symbol with only the csv header")
 
-ap.add_argument("-l", "--last", default=None, type=int)
-
-ap.add_argument("--div", dest="do_dividends", action='store_true')
-ap.add_argument("--opt", dest="do_options", action='store_true')
-
-ap.add_argument("--ibkr", action='store_true')
-ap.add_argument("--tasty", action='store_true')
-
-tgroup = ap.add_mutually_exclusive_group()
-tgroup.add_argument("-d", "--daily", default=False, action='store_true')
-tgroup.add_argument("-m", "--monthly", default=False, action='store_true')
-tgroup.add_argument("-q", "--quarterly", default=False, action='store_true')
-tgroup.add_argument("-y", "--yearly", default=False, action='store_true')
-tgroup.add_argument("--total", default=False, action='store_true')
-
-args = ap.parse_args()
+settings = Settings()  # pyright: ignore[reportCallIssue]
+args = settings
 
 
 if args.new:
     from stock_market.utils import new_ticker_options as new_ticker
-    new_ticker(args.new, args.opt_directory)
+    new_ticker(args.new, args.csv_directory)
     exit(0)
 
 gain_col = "credit"
@@ -64,19 +36,19 @@ else:
 
 
 credit_dfs = []
-if do_what in ["options", "both"]:
-    if args.ibkr:
+if args.do_options:
+    if args.ibkr_directory is not None:
         from stock_market.read.ibkr import read_ibkr_options_dir
         options_ibkr = read_ibkr_options_dir(Path(args.ibkr_directory))
         credit_dfs.append(options_ibkr)
 
-    if args.tasty:
+    if args.tasty_directory is not None:
         from stock_market.read.tasty import read_tasty_options_dir
         options_tasty = read_tasty_options_dir(Path(args.tasty_directory))
         credit_dfs.append(options_tasty)
 
 
-if do_what in ["dividends", "both"]:
+if args.do_dividends:
     from stock_market.read.ibkr import read_ibkr_dividends_dir
     dividends_ibkr = read_ibkr_dividends_dir(Path(args.ibkr_directory))
     credit_dfs.append(dividends_ibkr)

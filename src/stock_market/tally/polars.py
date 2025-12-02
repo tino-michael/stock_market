@@ -10,7 +10,7 @@ def filter_tickers(df, tickers: Iterable[str]):
     """)
 
 
-def filter_dates(df, start_date: str, end_date: str):
+def filter_dates(df, start_date: str | None, end_date: str | None):
     if start_date:
         df = df.sql(f"""
             select *
