@@ -64,19 +64,13 @@ if args.tickers:
 if args.start_date or args.end_date:
     credits = filter_dates(credits, args.start_date, args.end_date)
 
-
-for i, func in [
-    ("total", sum_total),
-    ("yearly", sum_yearly),
-    ("quarterly", sum_quarterly),
-    ("daily", sum_daily),
-    ("monthly", sum_monthly),
-]:
-    if vars(args)[i]:
-        # `func` is now the function given by CLI arg,
-        # so just exit the loop now (`func` keeps being set)
-        # if no period is given through CLI, keeps the last one (i.e. monthly)
-        break
+func = {
+    "total": sum_total,
+    "yearly": sum_yearly,
+    "quarterly": sum_quarterly,
+    "daily": sum_daily,
+    "monthly": sum_monthly,
+}[args.period]
 
 profits_tally = func(credits, gain_col, yoy=args.table_yoy, bar=args.bar, last=args.last)
 

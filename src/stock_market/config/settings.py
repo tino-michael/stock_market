@@ -40,13 +40,14 @@ class Settings(BaseSettings):
     yearly: bool = Field(False, validation_alias='y')
     total: bool = Field(False)
 
+    periods: list[str] = ['daily', 'monthly', 'quarterly', 'yearly', 'total']
+
     @model_validator(mode='after')
     def check_mutually_exclusive_frequency(self):
-        freqs = ['daily', 'monthly', 'quarterly', 'yearly', 'total']
-        selected = [f for f in freqs if getattr(self, f)]
+        selected = [f for f in self.periods if getattr(self, f)]
         if len(selected) > 1:
             raise ValueError(
-                f'At most one of {freqs} may be selected. Got: {selected}'
+                f'At most one of {self.periods} may be selected. Got: {selected}'
             )
 
         if len(selected) == 0:
@@ -56,7 +57,7 @@ class Settings(BaseSettings):
 
     @property
     def period(self) -> str:
-        for p in ['daily', 'monthly', 'quarterly', 'yearly', 'total']:
+        for p in self.periods:
             if getattr(self, p):
                 return p
         raise ValueError("No period selected")
