@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -13,9 +14,9 @@ class Settings(BaseSettings):
     plot: Optional[bool] = Field(False, validation_alias='p')
 
 
-    csv_directory: Optional[str] = Field(None)
-    ibkr_directory: Optional[str] = Field(None)
-    tasty_directory: Optional[str] = Field(None)
+    csv_directory: Optional[Path] = Field(None)
+    ibkr_directory: Optional[Path] = Field(None)
+    tasty_directory: Optional[Path] = Field(None)
 
     skip_actions: list[str] = Field([], validation_alias="a")
 

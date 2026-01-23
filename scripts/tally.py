@@ -21,29 +21,32 @@ args = settings
 
 if args.new:
     from stock_market.utils import new_ticker_options as new_ticker
+    assert args.csv_directory is not None
     new_ticker(args.new, args.csv_directory)
     exit(0)
 
 gain_col = "credit"
+columns: list[str] = ["currency", "date", "ticker", gain_col]
 
 
-credit_dfs = []
+credit_dfs: list[pl.DataFrame] = []
+
 if args.do_options:
     if args.ibkr_directory is not None:
         from stock_market.read.ibkr import read_ibkr_options_dir
-        options_ibkr = read_ibkr_options_dir(Path(args.ibkr_directory))
+        options_ibkr = read_ibkr_options_dir(args.ibkr_directory)[columns]
         credit_dfs.append(options_ibkr)
 
     if args.tasty_directory is not None:
         from stock_market.read.tasty import read_tasty_options_dir
-        options_tasty = read_tasty_options_dir(Path(args.tasty_directory))
+        options_tasty = read_tasty_options_dir(args.tasty_directory)[columns]
         credit_dfs.append(options_tasty)
 
-
 if args.do_dividends:
-    from stock_market.read.ibkr import read_ibkr_dividends_dir
-    dividends_ibkr = read_ibkr_dividends_dir(Path(args.ibkr_directory))
-    credit_dfs.append(dividends_ibkr)
+    if args.ibkr_directory is not None:
+        from stock_market.read.ibkr import read_ibkr_dividends_dir
+        dividends_ibkr = read_ibkr_dividends_dir(args.ibkr_directory)[columns]
+        credit_dfs.append(dividends_ibkr)
 
 
 if not credit_dfs:
