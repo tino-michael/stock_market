@@ -1,83 +1,201 @@
 # Stock Market
 
-In this repository, I collect scripts and snippets to help me deal with the stock market.
-So far, there are these scripts here:
+A collection of scripts and tools for tracking stock market investments, including dividend income and options trading (such as the "Wheel" strategy).
 
-- **wheel_profits** - keeps track of my profits and losses on the "Wheel" option strategy
-- **dividends** - keeps track of the dividends I collect
-- **nexo_interest** - sums up the interest received from Nexo and (TODO) converts it into another
-  currency
+## Overview
 
-## Wheel Profits
+The main script, `scripts/tally.py`, provides a powerful command-line tool for aggregating and analyzing your investment income. It supports:
 
-### Background
+- **Dividend tracking** - Monitor dividend income from your stock holdings
+- **Options trading tracking** - Track profits and losses from options trades (including the "Wheel" strategy)
+- **Combined tracking** - Analyze both dividends and options income together
 
-This script was heavily inspired by the
-[In the Money](https://www.youtube.com/channel/UCfMiRVQJuTj3NpZZP1tKShQ) YouTube channel.
-In one of his video tutorials, Adam presented the "Wheel" strategy for stock options trading
-and provided a link to a Google spreadsheet in which he suggests you write down your trades
-and track your progress.
+The script can import data from multiple sources:
+- **Interactive Brokers (IBKR)** export files
+- **Tastytrade** export files
+- Custom CSV files
 
-Initially, I was indeed using Adam's spreadsheet and wrote this script to read it in and get some
-more insight into the data. At some point, reading in the sheet became way too slow, so I moved
-to a text-based `.csv` system and adapted my script to read in those.
-(It still can read the excel sheet, though it is no longer my preferred method and the code
-no longer maintained.)
-Importing the data from all the `.csv` files is much faster and I can much easier switch between
-different tickers (by fuzzy-finding the file inside my texteditor instead of scrolling through the
-spreadsheet tab bar and clicking).
+## Installation
 
-### Data Files
+```bash
+# Using uv (recommended)
+uv sync
 
-Collect your option buy and sell data in `.csv` files in a dedicated directory.
-The script takes a path as command line argument and will read all `*.csv` files in that directory.
-I put trades from different stocks in separate files, though you could put everything into one file
-or separate in time instead (e.g. each month its own file).
-The files are expected to contain comma separated tables with the first line for the header.
-The files are imported by `pandas` and the columns referred to by **name**, so make sure that the
-following names are present:
+# Or using pip
+pip install .
 ```
-Action,Date,# of Shares,Share Price,Status
+
+## Quick Start
+
+### Create a new options tracking file
+
+```bash
+# Creates 'aapl.csv' in the specified directory with proper headers
+uv run scripts/tally.py --new AAPL --csv-directory /path/to/csv/files
 ```
-Additional columns and order don't matter. So you could, e.g., add a "Notes" column if you like.
-The script provides a `--new <ticker_name>` flag to create an otherwise empty file with a compliant
-header for you.
 
-Do be aware that you have to distinguish between debits and credits yourself!
-You can enter negative values in the share price or number of shares columns as to your liking.
-I want my bottom line to be positive when I *receive* money, so, when I sell an option contract,
-I put `100` in the number of shares column and the premium received (per share) into the
-share price column. When I buy the option back, `100` goes into the number column again and the
-price I paid goes as a *negative* number into the share price column.
+### Track dividends only
 
-### Usage
+```bash
+# Read IBKR dividend reports
+uv run scripts/tally.py --dividends --ibkr-directory /path/to/ibkr/reports
 
-Install the package with `pip install .` and run `wheel_profits.py` in the `scripts` folder.
-You can provide a number of command line arguments -- some optional, some mandatory -- so you
-probably want to wrap the python script again in a shell script, an alias or similar.
+# Read Tastytrade dividend reports
+uv run scripts/tally.py --dividends --tasty-directory /path/to/tasty/reports
 
-#### Data Source
+# Read from both sources
+uv run scripts/tally.py --dividends --ibkr-directory /path/to/ibkr --tasty-directory /path/to/tasty
+```
 
-Use `-d` to define a directory where to import all `*.csv` files from.
-You can use `--tickers` to only import files whose basename (sans the `.csv` ending) matches the
-given arguments.
+### Track options only
 
-#### Date Ranges
+```bash
+# Read IBKR options reports
+uv run scripts/tally.py --options --ibkr-directory /path/to/ibkr/reports
 
-The start and end dates for the tally are inferred from the provided data,
-using the earliest and latest found date, respectively.
-You can narrow the time frame with the `-s, --start_date` and `-e, --end_date` flags.
-The given dates are by default expected in ISO format: "YYYY-MM-DD", though the format can be
-changed with the `-f` flag (format string according to python's `datetime`).
-The time intervals (weeks, months etc.) are constructed using `pandas`.
-That means for example, that when you are looking at weekly tallies, the constructed weeks will be
-"calendar weeks" and your first week will be the one that starts with a Monday and contains your
-`start_date`.
+# Read Tastytrade options reports
+uv run scripts/tally.py --options --tasty-directory /path/to/tasty/reports
 
-#### Skipping Actions
+# Read from both sources
+uv run scripts/tally.py --options --ibkr-directory /path/to/ibkr --tasty-directory /path/to/tasty
+```
 
-I do put stock buy, sell and LEAPS trades into my files but I usually don't want them to be
-considered in my cash-flow calculations.
-You can use `-a` to ignore entries whose "Action" entry `starts_with` any provided argument.
+### Track both dividends and options
 
-Those buy and sell orders will be used in the companion script `adjusted_cost_basis.py`, though.
+```bash
+# Combined view of all income
+uv run scripts/tally.py --dividends --options --ibkr-directory /path/to/ibkr --tasty-directory /path/to/tasty
+```
+
+## Command-Line Options
+
+### Data Source Options
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--dividends` | `--div` | Include dividend data |
+| `--options` | `--opt` | Include options data |
+| `--csv-directory` | - | Directory containing custom CSV files |
+| `--ibkr-directory` | - | Directory containing IBKR export files (pattern: `IBKR_*`) |
+| `--tasty-directory` | - | Directory containing Tastytrade export files (pattern: `tasty_*`) |
+
+**Note:** CSV files for custom options tracking should have the following header:
+```csv
+Action,Date,# Shares,Share Price,Status
+```
+
+### Filtering Options
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--tickers` | `-t` | Filter by ticker symbols (comma-separated) |
+| `--currencies` | `-c` | Filter by currencies (comma-separated) |
+| `--start-date` | `-s` | Start date (YYYY-MM-DD format) |
+| `--end-date` | `-e` | End date (YYYY-MM-DD format) |
+
+### Aggregation Period Options
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--daily` | `-d` | Show daily totals |
+| `--monthly` | `-m` | Show monthly totals (default) |
+| `--quarterly` | `-q` | Show quarterly totals |
+| `--yearly` | `-y` | Show yearly totals |
+| `--total` | - | Show overall totals (always shown) |
+
+**Note:** Only one period option can be used at a time.
+
+### Display Options
+
+| Option | Description |
+|--------|-------------|
+| `--table-yoy` | Include year-over-year percentage in table |
+| `--no-bar` | Disable visual progress bars in output |
+| `--last N` | Show only the last N periods |
+
+### Plotting Options
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--plot` | `-p` | Show a bar plot of the data |
+| `--plot-yoy` | - | Include year-over-year calculation in plot |
+
+### Other Options
+
+| Option | Description |
+|--------|-------------|
+| `--new TICKER` | Create a new CSV template file for tracking TICKER |
+| `--skip-actions` | Skip actions starting with specified strings |
+
+
+## Output Format
+
+The script outputs tables with the following structure (example for quarterly output):
+
+```
+┌──────┬─────────┬───────────┬───────────┐
+│ year ┆ quarter ┆ credit    ┆ currency  │
+╞══════╪═════════╪═══════════╪═══════════╡
+│ 2023 ┆ 1       ┆ 1250.50   ┆ USD       │
+│ 2023 ┆ 2       ┆ 1450.75   ┆ USD       │
+│ 2023 ┆ 3       ┆ 1100.25   ┆ USD       │
+│ 2023 ┆ 4       ┆ 1800.00   ┆ USD       │
+│ 2024 ┆ 1       ┆ 1300.50   ┆ USD       │
+│ 2024 ┆ 2       ┆ 1550.75   ┆ USD       │
+└──────┴─────────┴───────────┴───────────┘
+```
+
+With `--table-yoy`, an additional column shows percentage change from the corresponding period in the previous year.
+
+With `--bar`, a visual progress bar column is added showing relative magnitude of each value.
+
+## Data Formats
+
+### IBKR CSV Format
+
+IBKR activity statement export using at least "Combined Dividends" and "Trades" sections.
+The script expects:
+- Options data in rows containing "Equity and Index Options"
+- Dividend data in rows where the first column is "Dividends"
+
+### Tastytrade CSV Format
+
+Tastytrade transaction history export:
+- Options: rows where "Instrument Type" = "Equity Option"
+- Dividends: rows where "Sub Type" = "Dividend"
+
+### Custom CSV Format
+
+For manual tracking, create CSV files with this header:
+```csv
+Action,Date,# Shares,Share Price,Status
+```
+
+**Important**: You must distinguish between debits and credits:
+- **Credits** (money received): Use positive values
+  - Example: Selling an option: 100 shares, premium of $2.50/share → `100` in "# Shares", `2.50` in "Share Price"
+- **Debits** (money spent): Use negative values
+  - Example: Buying back an option: 100 shares, cost of $0.50/share → `100` in "# Shares", `-0.50` in "Share Price"
+
+## Tips and Best Practices
+
+1. **Organize your files**: Keep IBKR and Tastytrade exports in separate directories
+2. **Use period filtering**: Default aggregation is monthly; use `--quarterly` or `--yearly` for longer-term views
+3. **Filter by ticker**: Focus on specific holdings using `--tickers`
+4. **Track currencies separately**: Use `--currencies` if you hold positions in multiple currencies
+5. **Visualize trends**: Use `--plot` or `--table-yoy` to see growth patterns
+6. **Date ranges**: Combine `--start-date` and `--end-date` to analyze specific periods
+7. **Create templates**: Use `--new` to quickly create new tracking files
+
+## Dependencies
+
+- Python >= 3.13
+- polars >= 1.34.0
+- loguru >= 0.7.3
+- pydantic-settings >= 2.12.0
+- pyqt6 >= 6.9.1 (for plotting)
+- seaborn >= 0.13.2 (for plotting)
+
+## License
+
+See [LICENSE](LICENSE) file for details.
