@@ -1,55 +1,52 @@
 from pathlib import Path
-from loguru import logger
 import polars as pl
 
-def read_tasty_options_dir(path: Path, pattern: str = "tasty_*"):
-    options_files = path.glob(pattern)
 
-    options_df = pl.concat([
-        read_tasty_options(f)
-        for f in options_files
-    ])
+def read_tasty_options_dir(path: Path):
+    return _read_tasty_dir(path, function=read_tasty_options)
 
-    return options_df
+
+def read_tasty_dividends_dir(path: Path):
+    return _read_tasty_dir(path, function=read_tasty_dividends)
+
+
+def _read_tasty_dir(path: Path, function, pattern: str = "tasty_*"):
+    return pl.concat(filter(lambda x: len(x), [
+        function(f) for f in path.glob(pattern)
+    ]))
+
+
+def _read_tasty_file(path: Path, *filters):
+    df = pl.read_csv(
+        path,
+        schema_overrides={
+            "Date": pl.Datetime,
+            "Strike Price": pl.String,
+            "Value": pl.String,
+            "Total": pl.String,
+        }
+    )
+    df = df.with_columns(
+        pl.col("Date").cast(pl.Date).cast(pl.String).alias("date"),
+        pl.col("Root Symbol").alias("ticker"),
+        pl.col("Currency").alias("currency"),
+        pl.col("Total")
+            .str.replace_all(",", "")
+            .cast(pl.Float64).alias("credit"),
+    ).filter(*filters)
+
+    return df[["date", "ticker", "credit", "currency"]]
 
 
 def read_tasty_options(path: Path):
-    opt_dict = {
-        "action": [],
-        "ticker": [],
-        "currency": [],
-        "date": [],
-        "ticker": [],
-        "credit": [],
-        "status": [],
-    }
-
-    with open(path, "r") as f:
-        for line in f:
-            row = line.split(",")
-            try:
-                int(row[0])
-            except ValueError:
-                # it's probably the first row (i.e. the header)
-                continue
-
-            what = row[5].split()[0]
-            if what not in ["PUT", "CALL"]:
-                logger.debug(f"skipping type {what}")
-                continue
-
-
-            profit = row[28].strip('"').replace('$', '')
-
-            opt_dict["action"].append("tasty")
-            opt_dict["ticker"].append(row[4].split('-')[0])
-            opt_dict["currency"].append("USD")
-            opt_dict["date"].append(row[12])
-            opt_dict["credit"].append(profit)
-            opt_dict["status"].append("closed")
-
-    df = pl.DataFrame(opt_dict)
-    df = df.with_columns(
-        pl.col("credit").cast(pl.Float64)
+    return _read_tasty_file(
+        path,
+        pl.col("Instrument Type") == "Equity Option"
     )
-    return df
+
+def read_tasty_dividends(path: Path):
+    return _read_tasty_file(
+        path,
+        pl.col("Sub Type") == "Dividend",
+        pl.col("credit") > 0
+    )

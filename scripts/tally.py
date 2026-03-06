@@ -7,6 +7,7 @@ import polars as pl
 
 from stock_market.config import Settings
 
+# TODO: move to config/
 from stock_market.utils import polars_settings
 from stock_market.tally import (
     sum_yearly, sum_quarterly, sum_monthly, sum_daily, sum_total,
@@ -47,7 +48,10 @@ if args.do_dividends:
         from stock_market.read.ibkr import read_ibkr_dividends_dir
         dividends_ibkr = read_ibkr_dividends_dir(args.ibkr_directory)[columns]
         credit_dfs.append(dividends_ibkr)
-
+    if args.tasty_directory is not None:
+        from stock_market.read.tasty import read_tasty_dividends_dir
+        dividends_tasty = read_tasty_dividends_dir(args.tasty_directory)[columns]
+        credit_dfs.append(dividends_tasty)
 
 if not credit_dfs:
     logger.warning("nothing found...")
