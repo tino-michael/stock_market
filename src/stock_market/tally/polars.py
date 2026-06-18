@@ -201,10 +201,10 @@ def sum_by_ticker(df, which: str = "credit", trailing_months: int = 12, *_args, 
     cutoff_str = cutoff_dt.strftime("%Y-%m-%d")
 
     return df.sql(f"""
-        select ticker, sum({which}) as "credit (TTM)"
+        select ticker, sum({which}) as "credit (TTM)", currency
         from self
         where date > '{cutoff_str}'
-        group by ticker
+        group by ticker, currency
         order by 2 desc
     """)
 
