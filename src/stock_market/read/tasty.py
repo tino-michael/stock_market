@@ -28,7 +28,11 @@ def _read_tasty_file(path: Path, *filters):
     )
     df = df.with_columns(
         pl.col("Date").cast(pl.Date).cast(pl.String).alias("date"),
-        pl.col("Root Symbol").alias("ticker"),
+        pl.coalesce(
+            pl.when(pl.col("Root Symbol") != "")
+             .then(pl.col("Root Symbol")),
+            pl.col("Symbol"),
+        ).alias("ticker"),
         pl.col("Currency").alias("currency"),
         pl.col("Total")
             .str.replace_all(",", "")
