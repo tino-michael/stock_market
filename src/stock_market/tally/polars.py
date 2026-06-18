@@ -187,6 +187,28 @@ def add_yoy_column(df: pl.DataFrame, which: str, shift: int):
     ])
 
 
+def sum_by_ticker(df, which: str = "credit", trailing_months: int = 12, *_args, **_kwargs):
+    """
+    Sum gains (positive values of `which` column) by ticker symbol
+    over the trailing N months (computed from the latest date in the data).
+    """
+    from datetime import datetime
+    from dateutil.relativedelta import relativedelta
+
+    max_date = df.select(pl.max("date")).item()
+    max_dt = datetime.strptime(max_date, "%Y-%m-%d")
+    cutoff_dt = max_dt - relativedelta(months=trailing_months)
+    cutoff_str = cutoff_dt.strftime("%Y-%m-%d")
+
+    return df.sql(f"""
+        select ticker, sum({which}) as "credit (TTM)"
+        from self
+        where date > '{cutoff_str}'
+        group by ticker
+        order by 2 desc
+    """)
+
+
 def add_bar_column(df: pl.DataFrame, which: str, width: int = 15, char: str = "#"):
     maximum = df[which].max()
 

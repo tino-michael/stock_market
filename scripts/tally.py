@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from pathlib import Path
 from loguru import logger
 
 import polars as pl
@@ -11,6 +10,7 @@ from stock_market.config import Settings
 from stock_market.utils import polars_settings
 from stock_market.tally import (
     sum_yearly, sum_quarterly, sum_monthly, sum_daily, sum_total,
+    sum_by_ticker,
     filter_tickers, filter_dates,
     filter_currencies
 )
@@ -74,6 +74,7 @@ func = {
     "quarterly": sum_quarterly,
     "daily": sum_daily,
     "monthly": sum_monthly,
+    "by_ticker": sum_by_ticker,
 }[args.period]
 
 profits_tally = func(credits, gain_col, yoy=args.table_yoy, bar=args.bar, last=args.last)
@@ -82,9 +83,8 @@ profits_tally = func(credits, gain_col, yoy=args.table_yoy, bar=args.bar, last=a
 print(profits_tally)
 
 # if not explicitly asked for, also print yearly tally
-if func is not sum_yearly:
+if func not in [sum_yearly,sum_by_ticker]:
     print(sum_yearly(credits, gain_col, yoy=args.table_yoy, bar=args.bar))
-
 
 # show a plot of quarterly time-series
 if args.plot or args.plot_yoy:

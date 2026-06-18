@@ -4,6 +4,8 @@ from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+periods: list[str] = ['daily', 'monthly', 'quarterly', 'yearly', 'total']
+
 class Settings(BaseSettings):
     currencies: list[str] = Field([], validation_alias='c')
     tickers: list[str] = Field([], validation_alias='t')
@@ -11,7 +13,7 @@ class Settings(BaseSettings):
     start_date: Optional[str] = Field(None, validation_alias='s')
     end_date: Optional[str] = Field(None, validation_alias='e')
 
-    plot: Optional[bool] = Field(False, validation_alias='p')
+    plot: bool = Field(False, validation_alias='p')
 
 
     csv_directory: Optional[Path] = Field(None)
@@ -38,26 +40,27 @@ class Settings(BaseSettings):
     monthly: bool = Field(False, validation_alias='m')
     quarterly: bool = Field(False, validation_alias='q')
     yearly: bool = Field(False, validation_alias='y')
+    by_ticker: bool = Field(False, validation_alias="by-ticker")
     total: bool = Field(False)
-
-    periods: list[str] = ['daily', 'monthly', 'quarterly', 'yearly', 'total']
 
     @model_validator(mode='after')
     def check_mutually_exclusive_frequency(self):
-        selected = [f for f in self.periods if getattr(self, f)]
+        selected = [f for f in periods if getattr(self, f)]
         if len(selected) > 1:
             raise ValueError(
-                f'At most one of {self.periods} may be selected. Got: {selected}'
+                f'At most one of {periods} may be selected. Got: {selected}'
             )
 
-        if len(selected) == 0:
+        if len(selected) == 0 and not self.by_ticker:
             self.monthly = True
 
         return self
 
     @property
     def period(self) -> str:
-        for p in self.periods:
+        if self.by_ticker:
+            return "by_ticker"
+        for p in periods:
             if getattr(self, p):
                 return p
         raise ValueError("No period selected")

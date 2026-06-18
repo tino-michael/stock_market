@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 
+raise DeprecationWarning
+
 
 def read_csv_file_wheel(filepath):
     """
