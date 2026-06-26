@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Optional
-from pydantic import Field, model_validator
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,7 +35,8 @@ class Settings(BaseSettings):
     plot_yoy: bool = Field(False)
     bar: bool = Field(True)
 
-    target_currency: Optional[str] = Field(None, validation_alias="convert-to")
+    target_currency: Optional[str] = Field(
+        None, validation_alias=AliasChoices("convert-to", "x"))
 
     daily: bool = Field(False, validation_alias='d')
     monthly: bool = Field(False, validation_alias='m')
