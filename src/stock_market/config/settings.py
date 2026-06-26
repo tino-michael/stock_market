@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     plot_yoy: bool = Field(False)
     bar: bool = Field(True)
 
+    target_currency: Optional[str] = Field(None, validation_alias="convert-to")
 
     daily: bool = Field(False, validation_alias='d')
     monthly: bool = Field(False, validation_alias='m')

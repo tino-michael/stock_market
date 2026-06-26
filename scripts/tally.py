@@ -62,6 +62,11 @@ credits = pl.concat(credit_dfs)
 if args.currencies:
     credits = filter_currencies(credits, set(c.upper() for c in args.currencies))
 
+# Convert all values to a common target currency if requested
+if args.target_currency:
+    from stock_market.utils.currency_converter import convert_dataframe
+    credits = convert_dataframe(credits, args.target_currency)
+
 if args.tickers:
     credits = filter_tickers(credits, set(t.upper() for t in args.tickers))
 

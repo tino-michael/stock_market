@@ -102,6 +102,9 @@ Action,Date,# Shares,Share Price,Status
 | `--quarterly` | `-q` | Show quarterly totals |
 | `--yearly` | `-y` | Show yearly totals |
 | `--total` | - | Show overall totals (always shown) |
+| `--convert-to` | - | Convert all values to the given currency. |
+|                |   | Uses live exchange rates from the Frankfurter API (https://www.frankfurter.app), |
+|                |   | no API key required. Falls back to a cached snapshot if the network is unavailable. |
 
 **Note:** Only one period option can be used at a time.
 
