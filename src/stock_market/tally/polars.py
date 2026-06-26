@@ -70,9 +70,13 @@ def sum_daily(df, which: str, yoy: bool = False, bar: bool = False, last: int = 
 
     return df
 
-def sum_monthly(df, which: str, yoy: bool = False, bar: bool = False, last: int = None):
+def sum_monthly(df, which: str|list[str], yoy: bool = False, bar: bool = False, last: int = None):
+
+    cols = [which] if isinstance(which, str) else which
+    sums = ", ".join(f"""sum("{c}") as "{c}" """ for c in cols)
+
     df = df.sql(f"""
-        select date, sum({which}), currency
+        select date, {sums}, currency
         from self
         group by
             substr(date, 0, 8),
@@ -81,10 +85,10 @@ def sum_monthly(df, which: str, yoy: bool = False, bar: bool = False, last: int 
     """)
 
     if yoy:
-        df = add_yoy_column(df, which, 12).sort(["date", "currency"])
+        df = add_yoy_column(df, which[-1], 12).sort(["date", "currency"])
 
     if bar:
-        df = add_bar_column(df, which=which)
+        df = add_bar_column(df, which=which[-1])
 
     if last:
         sort_dates = sorted(df["date"].unique())
@@ -131,22 +135,25 @@ def sum_quarterly(df, which: str, yoy: bool = False, bar: bool = False, last: in
 
 
 def sum_yearly(df, which: str, yoy: bool = False, bar: bool = False, last: int = None):
+    cols = [which] if isinstance(which, str) else which
+    sums = ", ".join(f"""sum("{c}") as "{c}" """ for c in cols)
+
     df = df.sql(f"""
         with grouping as (
             select *,
                 date_part('year', date(date)) as year,
             from self
         )
-        select year, sum({which}), currency
+        select year, {sums}, currency
         from grouping
         group by year, currency
         order by year, currency
     """)
 
     if yoy:
-        df = add_yoy_column(df, which, 1).sort(["year", "currency"])
+        df = add_yoy_column(df, which[-1], 1).sort(["year", "currency"])
     if bar:
-        df = add_bar_column(df, which=which)
+        df = add_bar_column(df, which=which[-1])
 
     return df
 

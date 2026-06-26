@@ -46,6 +46,8 @@ def read_tasty_options(path: Path):
     return _read_tasty_file(
         path,
         pl.col("Instrument Type") == "Equity Option"
+    ).with_columns(
+        pl.col("credit").alias("option credit"),
     )
 
 def read_tasty_dividends(path: Path):
@@ -53,4 +55,6 @@ def read_tasty_dividends(path: Path):
         path,
         pl.col("Sub Type") == "Dividend",
         pl.col("credit") > 0
+    ).with_columns(
+        pl.col("credit").alias("dividends"),
     )

@@ -54,7 +54,7 @@ def read_ibkr_options(path: Path):
 
     df = pl.DataFrame(opt_dict)
     df = df.with_columns(
-        pl.col("credit").cast(pl.Float64)
+        pl.col("credit").cast(pl.Float64).alias("option credit")
         # pl.col("date").cast(pl.Date) TODO:
     )
     return df
@@ -88,7 +88,7 @@ def read_ibkr_dividends(path: Path):
 
     df = pl.DataFrame(divi_dict)
     df = df.with_columns(
-        pl.col("credit").cast(pl.Float64)
+        pl.col("credit").cast(pl.Float64).alias("dividends")
         # pl.col("date").cast(pl.Date) # TODO:
     )
 

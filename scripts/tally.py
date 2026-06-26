@@ -26,38 +26,49 @@ if args.new:
     new_ticker(args.new, args.csv_directory)
     exit(0)
 
-gain_col = "credit"
-columns: list[str] = ["currency", "date", "ticker", gain_col]
-
+gain_cols: list[str] = []
+columns: list[str] = ["currency", "date", "ticker"]
 
 credit_dfs: list[pl.DataFrame] = []
 
 if args.do_options:
+    option_cols = columns + ["option credit"]
+    gain_cols.append("option credit")
     if args.ibkr_directory is not None:
         from stock_market.read.ibkr import read_ibkr_options_dir
-        options_ibkr = read_ibkr_options_dir(args.ibkr_directory)[columns]
+        options_ibkr = read_ibkr_options_dir(args.ibkr_directory)[option_cols]
         credit_dfs.append(options_ibkr)
 
     if args.tasty_directory is not None:
         from stock_market.read.tasty import read_tasty_options_dir
-        options_tasty = read_tasty_options_dir(args.tasty_directory)[columns]
+        options_tasty = read_tasty_options_dir(args.tasty_directory)[option_cols]
         credit_dfs.append(options_tasty)
 
 if args.do_dividends:
+    dividend_cols = columns + ["dividends"]
+    gain_cols.append("dividends")
     if args.ibkr_directory is not None:
         from stock_market.read.ibkr import read_ibkr_dividends_dir
-        dividends_ibkr = read_ibkr_dividends_dir(args.ibkr_directory)[columns]
+        dividends_ibkr = read_ibkr_dividends_dir(args.ibkr_directory)[dividend_cols]
         credit_dfs.append(dividends_ibkr)
     if args.tasty_directory is not None:
         from stock_market.read.tasty import read_tasty_dividends_dir
-        dividends_tasty = read_tasty_dividends_dir(args.tasty_directory)[columns]
+        dividends_tasty = read_tasty_dividends_dir(args.tasty_directory)[dividend_cols]
         credit_dfs.append(dividends_tasty)
 
 if not credit_dfs:
     logger.warning("nothing found...")
     exit(-1)
 
-credits = pl.concat(credit_dfs)
+credits = pl.concat(credit_dfs, how="diagonal")
+
+if args.do_dividends and args.do_options:
+    credits = credits.with_columns(
+        (pl.col("option credit").fill_null(0.0) + pl.col("dividends").fill_null(0.0))
+        .alias("total")
+    )
+    gain_cols.append("total")
+
 
 if args.currencies:
     credits = filter_currencies(credits, set(c.upper() for c in args.currencies))
@@ -65,7 +76,7 @@ if args.currencies:
 # Convert all values to a common target currency if requested
 if args.target_currency:
     from stock_market.utils.currency_converter import convert_dataframe
-    credits = convert_dataframe(credits, args.target_currency)
+    credits = convert_dataframe(credits, args.target_currency, columns=gain_cols)
 
 if args.tickers:
     credits = filter_tickers(credits, set(t.upper() for t in args.tickers))
@@ -82,14 +93,14 @@ func = {
     "by_ticker": sum_by_ticker,
 }[args.period]
 
-profits_tally = func(credits, gain_col, yoy=args.table_yoy, bar=args.bar, last=args.last)
+profits_tally = func(credits, gain_cols, yoy=args.table_yoy, bar=args.bar, last=args.last)
 
 # and print the resulting table
 print(profits_tally)
 
 # if not explicitly asked for, also print yearly tally
 if func not in [sum_yearly,sum_by_ticker]:
-    print(sum_yearly(credits, gain_col, yoy=args.table_yoy, bar=args.bar))
+    print(sum_yearly(credits, gain_cols, yoy=args.table_yoy, bar=args.bar))
 
 # show a plot of quarterly time-series
 if args.plot or args.plot_yoy:

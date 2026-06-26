@@ -53,7 +53,7 @@ _rates_cache: Dict[str, tuple[float, Dict[str, float]]] = {}
 # ---------------------------------------------------------------------------
 
 
-def convert_dataframe(df: pl.DataFrame, target_currency: str) -> pl.DataFrame:
+def convert_dataframe(df: pl.DataFrame, target_currency: str, columns: list[str]) -> pl.DataFrame:
     """
     Convert all monetary values in *df* from their original currencies
     to *target_currency* using live exchange rates.
@@ -120,12 +120,11 @@ def convert_dataframe(df: pl.DataFrame, target_currency: str) -> pl.DataFrame:
     }
 
     # Apply conversion: credit *= factor, currency = target
-    df = df.with_columns(
-        (pl.col("credit") * pl.col("currency").replace_strict(factor_map)).alias(
-            "credit"
-        ),
-        pl.lit(target).alias("currency"),
-    )
+    for col in columns:
+        df = df.with_columns(
+            (pl.col(col) * pl.col("currency").replace_strict(factor_map)).alias(col),
+            pl.lit(target).alias("currency"),
+        )
 
     logger.info("Conversion to %s complete.", target)
     return df
