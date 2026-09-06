@@ -49,9 +49,13 @@ def skip_actions(df, actions: Collection[str]):
     return df
 
 
-def sum_daily(df, which: str, yoy: bool = False, bar: bool = False, last: int = 0):
+def sum_daily(df, which: str|list[str], yoy: bool = False, bar: bool = False, last: int = 0):
+    
+    cols = [which] if isinstance(which, str) else which
+    sums = ", ".join(f"""sum("{c}") as "{c}" """ for c in cols)
+    
     df = df.sql(f"""
-        select date, sum({which}), currency
+        select date, {sums}, currency
         from self
         group by
             date,
